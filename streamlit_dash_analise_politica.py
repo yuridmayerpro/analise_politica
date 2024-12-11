@@ -40,8 +40,8 @@ def main():
         # Exibir gráfico com dimensões fixas
         st.plotly_chart(
             fig,
-            use_container_width=False,
-            config={"responsive": False},
+            use_container_width=True,
+            #config={"responsive": False},
             height=height,
             width=width
         )
