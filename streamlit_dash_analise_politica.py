@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.carregar_graficos import carregar_graficos_plotly
+from carregar_graficos import carregar_graficos_plotly
 
 def main():
     # Carregar os gráficos
