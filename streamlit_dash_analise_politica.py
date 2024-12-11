@@ -33,8 +33,6 @@ def main():
 
     # Função para exibir gráficos mantendo tamanhos originais
     def exibir_grafico_original(fig):
-        # Exportar o gráfico para JSON e reimportar com responsividade desativada
-        fig.update_layout(responsive=False)  # Configuração diretamente no gráfico Plotly
         st.plotly_chart(
             fig,
             use_container_width=False,  # Não preencher o container Streamlit
