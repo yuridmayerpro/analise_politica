@@ -86,6 +86,7 @@ def carregar_graficos_plotly():
             
             # Carregar o JSON em um gráfico Plotly
             grafico = pio.from_json(response.text)
+            grafico.update_layout(autosize=False)
             graficos_carregados[nome] = grafico
             logging.info(f"Gráfico {nome} carregado com sucesso.")
         except requests.exceptions.RequestException as e:
