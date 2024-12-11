@@ -41,11 +41,12 @@ def main():
         
         # Exibir gráfico com dimensões fixas
         st.plotly_chart(
-            fig,
-            use_container_width=True,
-            #config={"responsive": False},
-            height=height,
-            width=width
+            fig, 
+            use_container_width=False,  # Desativa o ajuste responsivo
+            config={
+                "displayModeBar": True,  # Mostra a barra de ferramentas do Plotly
+                "responsive": False       # Desativa a responsividade
+            }
         )
 
     # Mostrar gráficos com base na aba selecionada
