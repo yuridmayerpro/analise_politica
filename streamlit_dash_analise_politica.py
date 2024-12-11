@@ -35,18 +35,10 @@ def main():
 
     # Função para exibir gráficos com dimensões fixas
     def exibir_grafico_fixo(fig):
-        # Obter dimensões do gráfico original
-        height = fig.layout.height
-        width = fig.layout.width
-        
-        # Exibir gráfico com dimensões fixas
         st.plotly_chart(
             fig, 
-            use_container_width=False,  # Desativa o ajuste responsivo
-            config={
-                "displayModeBar": True,  # Mostra a barra de ferramentas do Plotly
-                "responsive": False       # Desativa a responsividade
-            }
+            use_container_width=False,
+            config={"responsive": False}
         )
 
     # Mostrar gráficos com base na aba selecionada
