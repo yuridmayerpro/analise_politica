@@ -11,10 +11,8 @@ def carregar_graficos_plotly():
     """
     # Configurar logging
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
     # URL base do GitHub
     diretorio_entrada = "https://raw.githubusercontent.com/yuridmayerpro/analise_politica/refs/heads/main/graficos_json/"
-
     # Lista de nomes dos arquivos JSON
     nomes_graficos = [
         # Resumo dos Regimes e Composição Política
@@ -76,10 +74,8 @@ def carregar_graficos_plotly():
         "fig_cultura_democratica_regime",
         "fig_cultura_democratica_pslri"
     ]
-
     # Dicionário para armazenar os gráficos carregados
     graficos_carregados = {}
-
     # Loop para baixar e carregar os gráficos
     for nome in nomes_graficos:
         url = f"{diretorio_entrada}{nome}.json"
@@ -90,19 +86,8 @@ def carregar_graficos_plotly():
             
             # Carregar o JSON em um gráfico Plotly
             grafico = pio.from_json(response.text)
-            
-            # Definir dimensões fixas para todos os gráficos
-            grafico.update_layout(
-                width=900,   # Largura padrão em pixels
-                height=600,  # Altura padrão em pixels
-                autosize=False,  # Desativa o redimensionamento automático
-                margin=dict(l=50, r=50, t=50, b=50)  # Ajusta as margens
-            )
-            
             graficos_carregados[nome] = grafico
             logging.info(f"Gráfico {nome} carregado com sucesso.")
         except requests.exceptions.RequestException as e:
             logging.error(f"Erro ao baixar {url}: {e}")
-
-
-
+    return graficos_carregados
