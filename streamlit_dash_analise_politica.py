@@ -2,6 +2,8 @@ import streamlit as st
 from carregar_graficos import carregar_graficos_plotly
 
 def main():
+    st.set_page_config(layout="wide")
+    
     # Carregar os gráficos
     st.sidebar.title("Configurações")
     st.sidebar.info("Carregando os gráficos...")
