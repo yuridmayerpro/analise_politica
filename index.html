@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Gráficos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #menu {
+            width: 200px;
+            float: left;
+            padding: 10px;
+            border-right: 1px solid #ddd;
+        }
+        #menu a {
+            display: block;
+            margin: 5px 0;
+            text-decoration: none;
+            color: #007BFF;
+        }
+        #menu a:hover {
+            text-decoration: underline;
+        }
+        #content {
+            margin-left: 220px;
+            padding: 10px;
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <h3>Dimensões</h3>
+        <a href="https://raw.githubusercontent.com/yuridmayerpro/analise_politica/refs/heads/main/graficos_html/fig_pslri_regime.html" target="content-frame">Resumo dos Regimes</a>
+        <a href="https://raw.githubusercontent.com/yuridmayerpro/analise_politica/refs/heads/main/graficos_html/fig_pib_regime.html" target="content-frame">Indicadores Econômicos</a>
+        <!-- Adicione links para os outros gráficos aqui -->
+    </div>
+    <div id="content">
+        <iframe name="content-frame" src=""></iframe>
+    </div>
+</body>
+</html>
