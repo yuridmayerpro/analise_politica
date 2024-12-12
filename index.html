@@ -30,25 +30,58 @@
             margin-left: 270px;
             padding: 10px;
         }
-        .dimension-content iframe {
-            width: 100%;
-            height: 600px;
+
+        /* Remover dimensões fixas do object. Ele será ajustado via JavaScript */
+        .dimension-content object {
             border: none;
+            display: block;
+            margin-bottom: 10px;
+            width: auto; 
+            height: auto;
         }
+
         .active {
             display: block;
+        }
+        .indicator-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
         }
     </style>
     <script>
         function toggleDimension(dimension) {
-            // Esconde todas as dimensões
             const contents = document.querySelectorAll('.dimension-content');
             contents.forEach(content => content.classList.remove('active'));
-
-            // Mostra apenas a dimensão clicada
             const selectedContent = document.getElementById(dimension);
             selectedContent.classList.add('active');
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const objects = document.querySelectorAll('.dimension-content object');
+
+            // Defina o percentual de aumento desejado aqui (por exemplo, 1.1 = +10%)
+            const percentualAumento = 1.1; 
+
+            objects.forEach(obj => {
+                obj.addEventListener('load', () => {
+                    const doc = obj.contentDocument || obj.contentWindow.document;
+                    const plotDiv = doc.querySelector('.plotly-graph-div');
+                    if (plotDiv) {
+                        const rect = plotDiv.getBoundingClientRect();
+                        
+                        const novaLargura = rect.width * percentualAumento;
+                        const novaAltura = rect.height * percentualAumento;
+
+                        obj.style.width = novaLargura + 'px';
+                        obj.style.height = novaAltura + 'px';
+                    }
+                });
+            });
+        });
     </script>
 </head>
 <body>
@@ -65,70 +98,106 @@
 
     <!-- Conteúdo das dimensões -->
     <div id="resumo" class="dimension-content active">
-        <iframe src="graficos_html/fig_pslri_regime.html"></iframe>
-        <iframe src="graficos_html/fig_pslri_distribuicao.html"></iframe>
+        <div class="indicator-title">Distribuição PSLRI e Regime</div>
+        <object data="graficos_html/fig_pslri_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_pslri_distribuicao.html" type="text/html"></object>
     </div>
 
     <div id="economicos" class="dimension-content">
-        <iframe src="graficos_html/fig_pib_vida.html"></iframe>
-        <iframe src="graficos_html/fig_pib_regime.html"></iframe>
-        <iframe src="graficos_html/fig_pib_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_crescimento_pib.html"></iframe>
-        <iframe src="graficos_html/fig_crescimento_pib_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_gini_regime.html"></iframe>
-        <iframe src="graficos_html/fig_gini_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_balanca_regime.html"></iframe>
-        <iframe src="graficos_html/fig_balanca_pslri.html"></iframe>
+        <div class="indicator-title">PIB e Qualidade de Vida</div>
+        <object data="graficos_html/fig_pib_vida.html" type="text/html"></object>
+
+        <div class="indicator-title">PIB por Regime e PSLRI</div>
+        <object data="graficos_html/fig_pib_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_pib_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Crescimento do PIB</div>
+        <object data="graficos_html/fig_crescimento_pib.html" type="text/html"></object>
+        <object data="graficos_html/fig_crescimento_pib_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Índice de Gini</div>
+        <object data="graficos_html/fig_gini_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_gini_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Balança Comercial</div>
+        <object data="graficos_html/fig_balanca_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_balanca_pslri.html" type="text/html"></object>
     </div>
 
     <div id="humanos" class="dimension-content">
-        <iframe src="graficos_html/fig_idh_regime_politico.html"></iframe>
-        <iframe src="graficos_html/fig_idh_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_expectativa_vida.html"></iframe>
-        <iframe src="graficos_html/fig_expectativa_vida_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_alfabetizacao_politico.html"></iframe>
-        <iframe src="graficos_html/fig_alfabetizacao_pslri.html"></iframe>
+        <div class="indicator-title">IDH por Regime e PSLRI</div>
+        <object data="graficos_html/fig_idh_regime_politico.html" type="text/html"></object>
+        <object data="graficos_html/fig_idh_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Expectativa de Vida</div>
+        <object data="graficos_html/fig_expectativa_vida.html" type="text/html"></object>
+        <object data="graficos_html/fig_expectativa_vida_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Alfabetização</div>
+        <object data="graficos_html/fig_alfabetizacao_politico.html" type="text/html"></object>
+        <object data="graficos_html/fig_alfabetizacao_pslri.html" type="text/html"></object>
     </div>
 
     <div id="sociais" class="dimension-content">
-        <iframe src="graficos_html/fig_taxa_pobreza_regime.html"></iframe>
-        <iframe src="graficos_html/fig_taxa_pobreza_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_desigualdade_genero_regime.html"></iframe>
-        <iframe src="graficos_html/fig_desigualdade_genero_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_taxa_desemprego_regime.html"></iframe>
-        <iframe src="graficos_html/fig_taxa_desemprego_pslri.html"></iframe>
+        <div class="indicator-title">Taxa de Pobreza</div>
+        <object data="graficos_html/fig_taxa_pobreza_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_taxa_pobreza_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Desigualdade de Gênero</div>
+        <object data="graficos_html/fig_desigualdade_genero_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_desigualdade_genero_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Taxa de Desemprego</div>
+        <object data="graficos_html/fig_taxa_desemprego_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_taxa_desemprego_pslri.html" type="text/html"></object>
     </div>
 
     <div id="ambientais" class="dimension-content">
-        <iframe src="graficos_html/fig_pegada_ecologica_regime.html"></iframe>
-        <iframe src="graficos_html/fig_pegada_ecologica_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_emissoes_co2_politico.html"></iframe>
-        <iframe src="graficos_html/fig_emissoes_co2_pslri.html"></iframe>
+        <div class="indicator-title">Pegada Ecológica</div>
+        <object data="graficos_html/fig_pegada_ecologica_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_pegada_ecologica_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Emissões de CO₂</div>
+        <object data="graficos_html/fig_emissoes_co2_politico.html" type="text/html"></object>
+        <object data="graficos_html/fig_emissoes_co2_pslri.html" type="text/html"></object>
     </div>
 
     <div id="institucionais" class="dimension-content">
-        <iframe src="graficos_html/fig_corrupcao_regime.html"></iframe>
-        <iframe src="graficos_html/fig_corrupcao_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_liberdade_economica.html"></iframe>
-        <iframe src="graficos_html/fig_liberdade_economica_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_democracia_liberal.html"></iframe>
-        <iframe src="graficos_html/fig_democracia_liberal_pslri.html"></iframe>
+        <div class="indicator-title">Corrupção Política</div>
+        <object data="graficos_html/fig_corrupcao_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_corrupcao_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Liberdade Econômica</div>
+        <object data="graficos_html/fig_liberdade_economica.html" type="text/html"></object>
+        <object data="graficos_html/fig_liberdade_economica_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Democracia Liberal</div>
+        <object data="graficos_html/fig_democracia_liberal.html" type="text/html"></object>
+        <object data="graficos_html/fig_democracia_liberal_pslri.html" type="text/html"></object>
     </div>
 
     <div id="demograficos" class="dimension-content">
-        <iframe src="graficos_html/fig_crescimento_populacional_regime.html"></iframe>
-        <iframe src="graficos_html/fig_crescimento_populacional_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_populacao_urbana_regime.html"></iframe>
-        <iframe src="graficos_html/fig_populacao_urbana_pslri.html"></iframe>
+        <div class="indicator-title">Crescimento Populacional</div>
+        <object data="graficos_html/fig_crescimento_populacional_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_crescimento_populacional_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">População Urbana</div>
+        <object data="graficos_html/fig_populacao_urbana_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_populacao_urbana_pslri.html" type="text/html"></object>
     </div>
 
     <div id="culturais" class="dimension-content">
-        <iframe src="graficos_html/fig_despesas_culturais_politico.html"></iframe>
-        <iframe src="graficos_html/fig_despesas_culturais_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_satisfacao_vida_regime.html"></iframe>
-        <iframe src="graficos_html/fig_satisfacao_vida_pslri.html"></iframe>
-        <iframe src="graficos_html/fig_cultura_democratica_regime.html"></iframe>
-        <iframe src="graficos_html/fig_cultura_democratica_pslri.html"></iframe>
+        <div class="indicator-title">Despesas Culturais</div>
+        <object data="graficos_html/fig_despesas_culturais_politico.html" type="text/html"></object>
+        <object data="graficos_html/fig_despesas_culturais_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Satisfação com a Vida</div>
+        <object data="graficos_html/fig_satisfacao_vida_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_satisfacao_vida_pslri.html" type="text/html"></object>
+
+        <div class="indicator-title">Cultura Democrática</div>
+        <object data="graficos_html/fig_cultura_democratica_regime.html" type="text/html"></object>
+        <object data="graficos_html/fig_cultura_democratica_pslri.html" type="text/html"></object>
     </div>
 </body>
 </html>
