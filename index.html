@@ -10,18 +10,42 @@
             background-color: #f5f5f5a9;
             margin: 0;
             padding: 0;
+            transition: margin-left 0.3s ease; /* Transição suave ao recolher o menu */
         }
+
+        /* Largura padrão do menu */
+        :root {
+            --menu-width: 250px;
+        }
+
         #menu {
-            width: 250px;
-            position: fixed; /* Menu fixo */
+            width: var(--menu-width);
+            position: fixed;
             top: 0;
             left: 0;
             padding: 10px;
             border-right: 1px solid #ddd;
-            height: 100vh; /* Altura total da janela */
-            overflow-y: auto; /* Rolagem no menu caso necessário */
-            background-color: #fff; /* Cor de fundo do menu */
+            height: 100vh;
+            overflow-y: auto;
+            background-color: #fff;
+            transition: width 0.3s ease; /* transição ao recolher */
         }
+
+        /* Botão para recolher/expandir o menu */
+        #menu-toggle {
+            position: fixed;
+            top: 10px;
+            left: var(--menu-width);
+            transform: translateX(-100%);
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: left 0.3s ease;
+            z-index: 999; /* Ficar sobre o menu */
+        }
+
         #menu h3 {
             margin-top: 20px;
             border-bottom: 1px solid #ccc;
@@ -29,24 +53,30 @@
             cursor: pointer;
             font-size: 14px;
         }
+
         #menu h3:hover {
             color: #007BFF;
         }
+
         #menu h3.selected {
             background-color: #007BFF;
             color: white;
             padding-left: 10px;
         }
+
         .dimension-content {
             display: none;
-            margin-left: 270px; /* Largura do menu para alinhar o conteúdo */
+            margin-left: calc(var(--menu-width) + 20px);
             padding: 10px;
+            transition: margin-left 0.3s ease;
         }
+
         .dimension-content.active {
             display: block;
-            height: calc(100vh - 20px); /* Ajustar altura do conteúdo */
-            overflow-y: auto; /* Rolagem somente no conteúdo dos gráficos */
+            height: calc(100vh - 20px);
+            overflow-y: auto;
         }
+
         .dimension-content object {
             border: none;
             display: block;
@@ -54,6 +84,7 @@
             width: auto; 
             height: auto;
         }
+
         .indicator-title {
             font-size: 18px;
             font-weight: bold;
@@ -61,6 +92,26 @@
             margin-bottom: 10px;
             border-bottom: 1px solid #ddd;
             padding-bottom: 5px;
+        }
+
+        /* Estado do menu recolhido */
+        body.collapsed #menu {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body.collapsed #menu h3 {
+            display: none; /* Esconder itens do menu ao recolher */
+        }
+
+        body.collapsed #menu-toggle {
+            left: 0;
+            transform: none;
+        }
+
+        body.collapsed .dimension-content {
+            margin-left: 20px;
         }
     </style>
     <script>
@@ -72,34 +123,38 @@
             const selectedContent = document.getElementById(dimension);
             const selectedMenu = document.querySelector(`#menu h3[onclick="toggleDimension('${dimension}')"]`);
             selectedContent.classList.add('active');
-            selectedMenu.classList.add('selected');
+            if (selectedMenu) {
+                selectedMenu.classList.add('selected');
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             const objects = document.querySelectorAll('.dimension-content object');
-
-            // Defina o percentual de aumento desejado aqui (por exemplo, 1.1 = +10%)
-            const percentualAumento = 1.1; 
-
+            const percentualAumento = 1.1; // Ajuste de tamanho dos gráficos
             objects.forEach(obj => {
                 obj.addEventListener('load', () => {
                     const doc = obj.contentDocument || obj.contentWindow.document;
                     const plotDiv = doc.querySelector('.plotly-graph-div');
                     if (plotDiv) {
                         const rect = plotDiv.getBoundingClientRect();
-                        
                         const novaLargura = rect.width * percentualAumento;
                         const novaAltura = rect.height * percentualAumento;
-
                         obj.style.width = novaLargura + 'px';
                         obj.style.height = novaAltura + 'px';
                     }
                 });
             });
+
+            // Botão para recolher/expandir o menu
+            const menuToggleBtn = document.getElementById('menu-toggle');
+            menuToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('collapsed');
+            });
         });
     </script>
 </head>
 <body>
+    <button id="menu-toggle">&#9776;</button>
     <div id="menu">
         <h3 onclick="toggleDimension('resumo')">Resumo dos Regimes e Composição Política</h3>
         <h3 onclick="toggleDimension('economicos')">Indicadores Econômicos</h3>
@@ -110,7 +165,6 @@
         <h3 onclick="toggleDimension('demograficos')">Indicadores Demográficos</h3>
         <h3 onclick="toggleDimension('culturais')">Indicadores Culturais</h3>
     </div>
-
 
     <!-- Conteúdo das dimensões -->
     <div id="resumo" class="dimension-content active">
@@ -184,8 +238,7 @@
         <object data="graficos_html/fig_corrupcao_pslri.html" type="text/html"></object>
 
         <div class="indicator-title">Liberdade Econômica</div>
-        <object data="graficos_html/fig_liberdade_economica.html" type
-        ="text/html"></object>
+        <object data="graficos_html/fig_liberdade_economica.html" type="text/html"></object>
         <object data="graficos_html/fig_liberdade_economica_pslri.html" type="text/html"></object>
 
         <div class="indicator-title">Democracia Liberal</div>
