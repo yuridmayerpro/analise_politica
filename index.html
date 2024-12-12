@@ -20,91 +20,115 @@
             margin-top: 20px;
             border-bottom: 1px solid #ccc;
             padding-bottom: 5px;
+            cursor: pointer;
         }
-        #menu a {
-            display: block;
-            margin: 5px 0;
-            text-decoration: none;
+        #menu h3:hover {
             color: #007BFF;
         }
-        #menu a:hover {
-            text-decoration: underline;
-        }
-        #content {
+        .dimension-content {
+            display: none;
             margin-left: 270px;
             padding: 10px;
         }
-        iframe {
+        .dimension-content iframe {
             width: 100%;
             height: 600px;
             border: none;
         }
+        .active {
+            display: block;
+        }
     </style>
+    <script>
+        function toggleDimension(dimension) {
+            // Esconde todas as dimensões
+            const contents = document.querySelectorAll('.dimension-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Mostra apenas a dimensão clicada
+            const selectedContent = document.getElementById(dimension);
+            selectedContent.classList.add('active');
+        }
+    </script>
 </head>
 <body>
     <div id="menu">
-        <h3>Dimensões</h3>
-        <h4>Resumo dos Regimes e Composição Política</h4>
-        <a href="graficos_html/fig_pslri_regime.html" target="content-frame">PSLRI Regime</a>
-        <a href="graficos_html/fig_pslri_distribuicao.html" target="content-frame">Distribuição PSLRI</a>
-
-        <h4>Indicadores Econômicos</h4>
-        <a href="graficos_html/fig_pib_vida.html" target="content-frame">PIB e Expectativa de Vida</a>
-        <a href="graficos_html/fig_pib_regime.html" target="content-frame">PIB por Regime</a>
-        <a href="graficos_html/fig_pib_pslri.html" target="content-frame">PIB por PSLRI</a>
-        <a href="graficos_html/fig_crescimento_pib.html" target="content-frame">Crescimento PIB por Regime</a>
-        <a href="graficos_html/fig_crescimento_pib_pslri.html" target="content-frame">Crescimento PIB por PSLRI</a>
-        <a href="graficos_html/fig_gini_regime.html" target="content-frame">Índice de Gini por Regime</a>
-        <a href="graficos_html/fig_gini_pslri.html" target="content-frame">Índice de Gini por PSLRI</a>
-        <a href="graficos_html/fig_balanca_regime.html" target="content-frame">Balança Comercial por Regime</a>
-        <a href="graficos_html/fig_balanca_pslri.html" target="content-frame">Balança Comercial por PSLRI</a>
-
-        <h4>Indicadores de Desenvolvimento Humano</h4>
-        <a href="graficos_html/fig_idh_regime_politico.html" target="content-frame">IDH por Regime</a>
-        <a href="graficos_html/fig_idh_pslri.html" target="content-frame">IDH por PSLRI</a>
-        <a href="graficos_html/fig_expectativa_vida.html" target="content-frame">Expectativa de Vida por Regime</a>
-        <a href="graficos_html/fig_expectativa_vida_pslri.html" target="content-frame">Expectativa de Vida por PSLRI</a>
-        <a href="graficos_html/fig_alfabetizacao_politico.html" target="content-frame">Alfabetização por Regime</a>
-        <a href="graficos_html/fig_alfabetizacao_pslri.html" target="content-frame">Alfabetização por PSLRI</a>
-
-        <h4>Indicadores Sociais</h4>
-        <a href="graficos_html/fig_taxa_pobreza_regime.html" target="content-frame">Taxa de Pobreza por Regime</a>
-        <a href="graficos_html/fig_taxa_pobreza_pslri.html" target="content-frame">Taxa de Pobreza por PSLRI</a>
-        <a href="graficos_html/fig_desigualdade_genero_regime.html" target="content-frame">Desigualdade de Gênero por Regime</a>
-        <a href="graficos_html/fig_desigualdade_genero_pslri.html" target="content-frame">Desigualdade de Gênero por PSLRI</a>
-        <a href="graficos_html/fig_taxa_desemprego_regime.html" target="content-frame">Taxa de Desemprego por Regime</a>
-        <a href="graficos_html/fig_taxa_desemprego_pslri.html" target="content-frame">Taxa de Desemprego por PSLRI</a>
-
-        <h4>Indicadores Ambientais e de Sustentabilidade</h4>
-        <a href="graficos_html/fig_pegada_ecologica_regime.html" target="content-frame">Pegada Ecológica por Regime</a>
-        <a href="graficos_html/fig_pegada_ecologica_pslri.html" target="content-frame">Pegada Ecológica por PSLRI</a>
-        <a href="graficos_html/fig_emissoes_co2_politico.html" target="content-frame">Emissões de CO₂ por Regime</a>
-        <a href="graficos_html/fig_emissoes_co2_pslri.html" target="content-frame">Emissões de CO₂ por PSLRI</a>
-
-        <h4>Indicadores Institucionais e de Governança</h4>
-        <a href="graficos_html/fig_corrupcao_regime.html" target="content-frame">Corrupção por Regime</a>
-        <a href="graficos_html/fig_corrupcao_pslri.html" target="content-frame">Corrupção por PSLRI</a>
-        <a href="graficos_html/fig_liberdade_economica.html" target="content-frame">Liberdade Econômica por Regime</a>
-        <a href="graficos_html/fig_liberdade_economica_pslri.html" target="content-frame">Liberdade Econômica por PSLRI</a>
-        <a href="graficos_html/fig_democracia_liberal.html" target="content-frame">Democracia Liberal por Regime</a>
-        <a href="graficos_html/fig_democracia_liberal_pslri.html" target="content-frame">Democracia Liberal por PSLRI</a>
-
-        <h4>Indicadores Demográficos</h4>
-        <a href="graficos_html/fig_crescimento_populacional_regime.html" target="content-frame">Crescimento Populacional por Regime</a>
-        <a href="graficos_html/fig_crescimento_populacional_pslri.html" target="content-frame">Crescimento Populacional por PSLRI</a>
-        <a href="graficos_html/fig_populacao_urbana_regime.html" target="content-frame">População Urbana por Regime</a>
-        <a href="graficos_html/fig_populacao_urbana_pslri.html" target="content-frame">População Urbana por PSLRI</a>
-
-        <h4>Indicadores Culturais</h4>
-        <a href="graficos_html/fig_despesas_culturais_politico.html" target="content-frame">Despesas Culturais por Regime</a>
-        <a href="graficos_html/fig_despesas_culturais_pslri.html" target="content-frame">Despesas Culturais por PSLRI</a>
-        <a href="graficos_html/fig_satisfacao_vida_regime.html" target="content-frame">Satisfação com a Vida por Regime</a>
-        <a href="graficos_html/fig_satisfacao_vida_pslri.html" target="content-frame">Satisfação com a Vida por PSLRI</a>
-        <a href="graficos_html/fig_cultura_democratica_regime.html" target="content-frame">Cultura Democrática por Regime</a>
-        <a href="graficos_html/fig_cultura_democratica_pslri.html" target="content-frame">Cultura Democrática por PSLRI</a>
+        <h3 onclick="toggleDimension('resumo')">Resumo dos Regimes e Composição Política</h3>
+        <h3 onclick="toggleDimension('economicos')">Indicadores Econômicos</h3>
+        <h3 onclick="toggleDimension('humanos')">Indicadores de Desenvolvimento Humano</h3>
+        <h3 onclick="toggleDimension('sociais')">Indicadores Sociais</h3>
+        <h3 onclick="toggleDimension('ambientais')">Indicadores Ambientais e de Sustentabilidade</h3>
+        <h3 onclick="toggleDimension('institucionais')">Indicadores Institucionais e de Governança</h3>
+        <h3 onclick="toggleDimension('demograficos')">Indicadores Demográficos</h3>
+        <h3 onclick="toggleDimension('culturais')">Indicadores Culturais</h3>
     </div>
-    <div id="content">
-        <iframe name="content-frame" src=""></iframe>
+
+    <!-- Conteúdo das dimensões -->
+    <div id="resumo" class="dimension-content active">
+        <iframe src="graficos_html/fig_pslri_regime.html"></iframe>
+        <iframe src="graficos_html/fig_pslri_distribuicao.html"></iframe>
+    </div>
+
+    <div id="economicos" class="dimension-content">
+        <iframe src="graficos_html/fig_pib_vida.html"></iframe>
+        <iframe src="graficos_html/fig_pib_regime.html"></iframe>
+        <iframe src="graficos_html/fig_pib_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_crescimento_pib.html"></iframe>
+        <iframe src="graficos_html/fig_crescimento_pib_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_gini_regime.html"></iframe>
+        <iframe src="graficos_html/fig_gini_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_balanca_regime.html"></iframe>
+        <iframe src="graficos_html/fig_balanca_pslri.html"></iframe>
+    </div>
+
+    <div id="humanos" class="dimension-content">
+        <iframe src="graficos_html/fig_idh_regime_politico.html"></iframe>
+        <iframe src="graficos_html/fig_idh_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_expectativa_vida.html"></iframe>
+        <iframe src="graficos_html/fig_expectativa_vida_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_alfabetizacao_politico.html"></iframe>
+        <iframe src="graficos_html/fig_alfabetizacao_pslri.html"></iframe>
+    </div>
+
+    <div id="sociais" class="dimension-content">
+        <iframe src="graficos_html/fig_taxa_pobreza_regime.html"></iframe>
+        <iframe src="graficos_html/fig_taxa_pobreza_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_desigualdade_genero_regime.html"></iframe>
+        <iframe src="graficos_html/fig_desigualdade_genero_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_taxa_desemprego_regime.html"></iframe>
+        <iframe src="graficos_html/fig_taxa_desemprego_pslri.html"></iframe>
+    </div>
+
+    <div id="ambientais" class="dimension-content">
+        <iframe src="graficos_html/fig_pegada_ecologica_regime.html"></iframe>
+        <iframe src="graficos_html/fig_pegada_ecologica_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_emissoes_co2_politico.html"></iframe>
+        <iframe src="graficos_html/fig_emissoes_co2_pslri.html"></iframe>
+    </div>
+
+    <div id="institucionais" class="dimension-content">
+        <iframe src="graficos_html/fig_corrupcao_regime.html"></iframe>
+        <iframe src="graficos_html/fig_corrupcao_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_liberdade_economica.html"></iframe>
+        <iframe src="graficos_html/fig_liberdade_economica_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_democracia_liberal.html"></iframe>
+        <iframe src="graficos_html/fig_democracia_liberal_pslri.html"></iframe>
+    </div>
+
+    <div id="demograficos" class="dimension-content">
+        <iframe src="graficos_html/fig_crescimento_populacional_regime.html"></iframe>
+        <iframe src="graficos_html/fig_crescimento_populacional_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_populacao_urbana_regime.html"></iframe>
+        <iframe src="graficos_html/fig_populacao_urbana_pslri.html"></iframe>
+    </div>
+
+    <div id="culturais" class="dimension-content">
+        <iframe src="graficos_html/fig_despesas_culturais_politico.html"></iframe>
+        <iframe src="graficos_html/fig_despesas_culturais_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_satisfacao_vida_regime.html"></iframe>
+        <iframe src="graficos_html/fig_satisfacao_vida_pslri.html"></iframe>
+        <iframe src="graficos_html/fig_cultura_democratica_regime.html"></iframe>
+        <iframe src="graficos_html/fig_cultura_democratica_pslri.html"></iframe>
     </div>
 </body>
 </html>
