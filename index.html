@@ -7,41 +7,52 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f5f5f5a9;
+            margin: 0;
+            padding: 0;
         }
         #menu {
             width: 250px;
-            float: left;
+            position: fixed; /* Menu fixo */
+            top: 0;
+            left: 0;
             padding: 10px;
             border-right: 1px solid #ddd;
-            height: 100vh;
-            overflow-y: auto;
+            height: 100vh; /* Altura total da janela */
+            overflow-y: auto; /* Rolagem no menu caso necessário */
+            background-color: #fff; /* Cor de fundo do menu */
         }
         #menu h3 {
             margin-top: 20px;
             border-bottom: 1px solid #ccc;
             padding-bottom: 5px;
             cursor: pointer;
+            font-size: 14px;
         }
         #menu h3:hover {
             color: #007BFF;
         }
+        #menu h3.selected {
+            background-color: #007BFF;
+            color: white;
+            padding-left: 10px;
+        }
         .dimension-content {
             display: none;
-            margin-left: 270px;
+            margin-left: 270px; /* Largura do menu para alinhar o conteúdo */
             padding: 10px;
         }
-
-        /* Remover dimensões fixas do object. Ele será ajustado via JavaScript */
+        .dimension-content.active {
+            display: block;
+            height: calc(100vh - 20px); /* Ajustar altura do conteúdo */
+            overflow-y: auto; /* Rolagem somente no conteúdo dos gráficos */
+        }
         .dimension-content object {
             border: none;
             display: block;
             margin-bottom: 10px;
             width: auto; 
             height: auto;
-        }
-
-        .active {
-            display: block;
         }
         .indicator-title {
             font-size: 18px;
@@ -55,9 +66,13 @@
     <script>
         function toggleDimension(dimension) {
             const contents = document.querySelectorAll('.dimension-content');
+            const menuItems = document.querySelectorAll('#menu h3');
             contents.forEach(content => content.classList.remove('active'));
+            menuItems.forEach(item => item.classList.remove('selected'));
             const selectedContent = document.getElementById(dimension);
+            const selectedMenu = document.querySelector(`#menu h3[onclick="toggleDimension('${dimension}')"]`);
             selectedContent.classList.add('active');
+            selectedMenu.classList.add('selected');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -96,6 +111,7 @@
         <h3 onclick="toggleDimension('culturais')">Indicadores Culturais</h3>
     </div>
 
+
     <!-- Conteúdo das dimensões -->
     <div id="resumo" class="dimension-content active">
         <div class="indicator-title">Distribuição PSLRI e Regime</div>
@@ -104,7 +120,7 @@
     </div>
 
     <div id="economicos" class="dimension-content">
-        <div class="indicator-title">PIB e Qualidade de Vida</div>
+        <div class="indicator-title"><span style='color:#000000;'>PIB e Qualidade de Vida</span></div>
         <object data="graficos_html/fig_pib_vida.html" type="text/html"></object>
 
         <div class="indicator-title">PIB por Regime e PSLRI</div>
@@ -168,7 +184,8 @@
         <object data="graficos_html/fig_corrupcao_pslri.html" type="text/html"></object>
 
         <div class="indicator-title">Liberdade Econômica</div>
-        <object data="graficos_html/fig_liberdade_economica.html" type="text/html"></object>
+        <object data="graficos_html/fig_liberdade_economica.html" type
+        ="text/html"></object>
         <object data="graficos_html/fig_liberdade_economica_pslri.html" type="text/html"></object>
 
         <div class="indicator-title">Democracia Liberal</div>
