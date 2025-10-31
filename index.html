@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,6 +29,7 @@
             overflow-y: auto;
             background-color: #fff;
             transition: width 0.3s ease; /* transição ao recolher */
+            z-index: 998;
         }
 
         /* Botão para recolher/expandir o menu */
@@ -44,6 +45,7 @@
             cursor: pointer;
             transition: left 0.3s ease;
             z-index: 999; /* Ficar sobre o menu */
+            border-radius: 0 4px 4px 0;
         }
 
         #menu h3 {
@@ -52,10 +54,13 @@
             padding-bottom: 5px;
             cursor: pointer;
             font-size: 14px;
+            padding: 8px 5px;
+            border-radius: 4px;
         }
 
         #menu h3:hover {
             color: #007BFF;
+            background-color: #f0f0f0;
         }
 
         #menu h3.selected {
@@ -94,11 +99,97 @@
             padding-bottom: 5px;
         }
 
+        /* Estilos para o conteúdo de texto (Início, Fontes de Dados, Esclarecimentos) */
+        .text-content {
+            max-width: 800px; /* Limita a largura para melhor legibilidade */
+            margin: 20px; /* Espaçamento do conteúdo */
+            padding: 25px;
+            background-color: #fff; /* Fundo branco para o texto */
+            border-radius: 8px; /* Cantos arredondados */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra suave */
+            line-height: 1.6; /* Espaçamento entre linhas */
+            color: #333;
+        }
+
+        .text-content h1, .text-content h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #007BFF; /* Linha azul abaixo do título principal */
+            padding-bottom: 10px;
+            color: #333;
+        }
+        
+        .text-content h2 {
+            font-size: 20px;
+            margin-top: 30px;
+        }
+
+        .text-content h4 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #007BFF; /* Cor azul para subtítulos */
+        }
+
+        .text-content p {
+            margin-bottom: 15px;
+            color: #555; /* Cor de texto mais suave */
+        }
+        
+        .text-content a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .text-content a:hover {
+            text-decoration: underline;
+        }
+
+        .text-content ul, .text-content ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .text-content ul {
+            list-style-type: disc; /* Marcadores de lista padrão */
+        }
+        
+        .text-content ol {
+            list-style-type: decimal;
+        }
+
+        .text-content li {
+            margin-bottom: 10px; /* Mais espaço entre itens de lista */
+        }
+
+        .text-content strong {
+            color: #000; /* Destaque mais forte para negrito */
+            font-weight: 600;
+        }
+
+        .text-content hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 30px 0;
+        }
+        
+        .text-content ol li {
+            margin-bottom: 15px; /* Mais espaço em listas ordenadas */
+        }
+        
+        .text-content ol ol li {
+            margin-bottom: 5px; /* Menos espaço em sub-listas */
+        }
+
+
         /* Estado do menu recolhido */
         body.collapsed #menu {
             width: 0;
             padding: 0;
             overflow: hidden;
+            border: none;
         }
 
         body.collapsed #menu h3 {
@@ -108,21 +199,33 @@
         body.collapsed #menu-toggle {
             left: 0;
             transform: none;
+            border-radius: 0 4px 4px 0;
         }
 
         body.collapsed .dimension-content {
             margin-left: 20px;
+        }
+
+        body.collapsed .text-content {
+             margin-left: 40px; /* Ajusta margem do texto quando menu recolhido */
         }
     </style>
     <script>
         function toggleDimension(dimension) {
             const contents = document.querySelectorAll('.dimension-content');
             const menuItems = document.querySelectorAll('#menu h3');
+            
+            // Esconde todos os conteúdos e remove a seleção de todos os itens do menu
             contents.forEach(content => content.classList.remove('active'));
             menuItems.forEach(item => item.classList.remove('selected'));
+            
+            // Mostra o conteúdo selecionado e marca o item do menu
             const selectedContent = document.getElementById(dimension);
             const selectedMenu = document.querySelector(`#menu h3[onclick="toggleDimension('${dimension}')"]`);
-            selectedContent.classList.add('active');
+            
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            }
             if (selectedMenu) {
                 selectedMenu.classList.add('selected');
             }
@@ -131,16 +234,24 @@
         document.addEventListener('DOMContentLoaded', () => {
             const objects = document.querySelectorAll('.dimension-content object');
             const percentualAumento = 1.1; // Ajuste de tamanho dos gráficos
+            
             objects.forEach(obj => {
                 obj.addEventListener('load', () => {
-                    const doc = obj.contentDocument || obj.contentWindow.document;
-                    const plotDiv = doc.querySelector('.plotly-graph-div');
-                    if (plotDiv) {
-                        const rect = plotDiv.getBoundingClientRect();
-                        const novaLargura = rect.width * percentualAumento;
-                        const novaAltura = rect.height * percentualAumento;
-                        obj.style.width = novaLargura + 'px';
-                        obj.style.height = novaAltura + 'px';
+                    // Tenta acessar o documento dentro do <object>
+                    try {
+                        const doc = obj.contentDocument || obj.contentWindow.document;
+                        if (!doc) return; // Sai se não conseguir acessar o documento (ex: cross-origin)
+
+                        const plotDiv = doc.querySelector('.plotly-graph-div');
+                        if (plotDiv) {
+                            const rect = plotDiv.getBoundingClientRect();
+                            const novaLargura = rect.width * percentualAumento;
+                            const novaAltura = rect.height * percentualAumento;
+                            obj.style.width = novaLargura + 'px';
+                            obj.style.height = novaAltura + 'px';
+                        }
+                    } catch (e) {
+                        console.warn("Não foi possível acessar o conteúdo do <object> para redimensionar:", obj.data, e);
                     }
                 });
             });
@@ -150,12 +261,20 @@
             menuToggleBtn.addEventListener('click', () => {
                 document.body.classList.toggle('collapsed');
             });
+
+            // Garante que o primeiro item ("Início") esteja selecionado ao carregar
+            toggleDimension('inicio');
         });
     </script>
 </head>
 <body>
-    <button id="menu-toggle">&#9776;</button>
+    <button id="menu-toggle" title="Recolher/Expandir Menu">&#9776;</button>
+    
+    <!-- Menu Lateral -->
     <div id="menu">
+        <h3 onclick="toggleDimension('inicio')">Início</h3>
+        <h3 onclick="toggleDimension('fontes')">Fontes de Dados</h3>
+        <h3 onclick="toggleDimension('esclarecimentos')">Esclarecimentos</h3>
         <h3 onclick="toggleDimension('resumo')">Resumo dos Regimes e Composição Política</h3>
         <h3 onclick="toggleDimension('economicos')">Indicadores Econômicos</h3>
         <h3 onclick="toggleDimension('humanos')">Indicadores de Desenvolvimento Humano</h3>
@@ -167,7 +286,278 @@
     </div>
 
     <!-- Conteúdo das dimensões -->
-    <div id="resumo" class="dimension-content active">
+
+    <!-- Seção: Início -->
+    <div id="inicio" class="dimension-content active">
+        <div class="text-content">
+            <h2>Sobre esta análise</h2>
+            
+            <p>Sou cientista de dados e, ao longo deste projeto, decidi avaliar por conta própria o que diversos indicadores socioeconômicos e culturais revelam sobre <strong>orientações políticas (direita/esquerda)</strong> e <strong>tipos de regime</strong>. Meu objetivo foi conduzir uma análise transparente e imparcial – uma “análise de peito aberto” – que se baseia unicamente em cruzamentos de diferentes fontes de <strong>dados oficiais e reconhecidos</strong>, sem recorrer a pressupostos ideológicos ou interpretações prévias.</p>
+            
+            <h4>Surpresas e Aprendizados</h4>
+            <p>Fiquei surpreso com algumas das informações que os dados revelaram – e, inclusive, algumas chegaram a contrariar minhas ideias iniciais – porém, como cientista de dados, pude <strong>refinar meu entendimento e ajustar minhas hipóteses</strong> com base nas evidências analisadas.</p>
+            
+            <p>Esta é uma investigação inicial, focada em identificar <strong>tendências gerais e relações</strong> entre variáveis como:</p>
+            <ul>
+                <li>PIB</li>
+                <li>IDH</li>
+                <li>Desigualdade</li>
+                <li>Meio ambiente</li>
+                <li>Democracia</li>
+            </ul>
+            
+            <p>Não me aprofundei ainda em análises estatísticas avançadas ou em modelos complexos: aqui, você encontrará um panorama direto dos <strong>dados brutos</strong>, organizado por <strong>regime político</strong> e pelo índice <strong>Left-Right (PSLRI)</strong>.</p>
+            
+            <p>Nas visualizações (boxplots), cada caixa sintetiza a distribuição histórica de um indicador – considerando praticamente todos os países ao longo dos anos – para cada regime ou orientação política, funcionando como um “retrato” das conjunturas ao longo do tempo e destacando as tendências gerais e as relações entre as variáveis.</p>
+            
+            <hr>
+            
+            <p><strong>Não aceite passivamente nenhuma conclusão</strong> – nem as minhas, nem as de terceiros. Convido você a <strong>explorar os conjuntos de dados originais</strong>, verificar cada fonte e reproduzir os cálculos.<br>
+            Só assim podemos <strong>formar nossas próprias opiniões</strong> de forma consciente e responsável.</p>
+        </div>
+    </div>
+
+    <!-- Seção: Fontes de Dados -->
+    <div id="fontes" class="dimension-content">
+        <div class="text-content">
+            <h1 id="fontes-de-dados-utilizadas">Fontes de dados utilizadas</h1>
+            <p>Nesta página você encontra todas as fontes de dados utilizadas neste projeto.<br />
+            Os links para cada fonte estão detalhados em seguida.</p>
+            <p>Fontes:<br>
+            - <strong>Our World in Data</strong><br />
+            - <strong>Varieties of Democracy (V-Dem)</strong><br />
+            - <strong>Banco Mundial (World Bank)</strong><br />
+            - <strong>Global Footprint Network</strong><br />
+            - <strong>Fraser Institute</strong>  </p>
+            <p>Para mais detalhes sobre as metodologias empregadas, o escopo dos indicadores e os processos de coleta de dados de cada instituição, consulte diretamente os sites oficiais de cada fonte.  </p>
+            <hr />
+            <h2 id="resumo-dos-regimes-e-composicao-politica">Resumo dos Regimes e Composição Política</h2>
+            <ul>
+            <li>
+            <p><strong>Regime Político</strong><br />
+              Fonte: <em>Our World in Data</em>, Political Regime dataset<br />
+            <a href="https://ourworldindata.org/grapher/political-regime" target="_blank">https://ourworldindata.org/grapher/political-regime</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Party-System Left-Right Index (PSLRI)</strong><br />
+              Fonte: <em>Varieties of Democracy (V-Dem)</em>, Country–Year Full + Others v14<br />
+            <a href="https://www.v-dem.net/data/the-v-dem-dataset/country-year-v-dem-fullothers-v14/" target="_blank">https://www.v-dem.net/data/the-v-dem-dataset/country-year-v-dem-fullothers-v14/</a><br />
+              <br></p>
+            </li>
+            </ul>
+            <hr />
+            <h2 id="indicadores-economicos">Indicadores Econômicos</h2>
+            <ul>
+            <li>
+            <p><strong>PIB per capita (PPC)</strong><br />
+              Fonte: World Bank<br />
+            <a href="https://prosperitydata360.worldbank.org/en/indicator/WB+WDI+NY+GDP+PCAP+PP+KD" target="_blank">https://prosperitydata360.worldbank.org/en/indicator/WB+WDI+NY+GDP+PCAP+PP+KD</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Crescimento do PIB (anual %)</strong><br />
+              Fonte: World Bank<br />
+            <a href="https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG" target="_blank">https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Índice de Gini (Desigualdade)</strong><br />
+              Fonte: World Bank<br />
+            <a href="https://data.worldbank.org/indicator/SI.POV.GINI" target="_blank">https://data.worldbank.org/indicator/SI.POV.GINI</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Balança Comercial (% do PIB)</strong><br />
+              Fonte: World Bank<br />
+            <a href="https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS" target="_blank">https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS</a><br />
+              <br></p>
+            </li>
+            </ul>
+            <hr />
+            <h2 id="indicadores-de-desenvolvimento-humano">Indicadores de Desenvolvimento Humano</h2>
+            <ul>
+            <li>
+            <p><strong>Índice de Desenvolvimento Humano (IDH)</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/human-development-index" target="_blank">https://ourworldindata.org/grapher/human-development-index</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Expectativa de Vida ao Nascer</strong><br />
+              Fonte: World Bank<br />
+            <a href="https://data.worldbank.org/indicator/SP.DYN.LE00.IN" target="_blank">https://data.worldbank.org/indicator/SP.DYN.LE00.IN</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Taxa de Alfabetização de Adultos (%)</strong><br />
+              Fonte: World Bank<br />
+            <a href="https://data.worldbank.org/indicator/SE.ADT.LITR.ZS" target="_blank">https://data.worldbank.org/indicator/SE.ADT.LITR.ZS</a><br />
+              <br></p>
+            </li>
+            </ul>
+            <hr />
+            <h2 id="indicadores-sociais">Indicadores Sociais</h2>
+            <ul>
+            <li>
+            <p><strong>Taxa de Pobreza (extrema)</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://nyc3.digitaloceanspaces.com/owid-public/data/poverty/pip_dataset.csv" target="_blank">https://nyc3.digitaloceanspaces.com/owid-public/data/poverty/pip_dataset.csv</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Taxa de Desemprego (% da força de trabalho)</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/unemployment-rate" target="_blank">https://ourworldindata.org/grapher/unemployment-rate</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Índice de Desigualdade de Gênero (GII)</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/gender-inequality-index-from-the-human-development-report" target="_blank">https://ourworldindata.org/grapher/gender-inequality-index-from-the-human-development-report</a><br />
+              <br></p>
+            </li>
+            </ul>
+            <hr />
+            <h2 id="indicadores-ambientais-e-de-sustentabilidade">Indicadores Ambientais e de Sustentabilidade</h2>
+            <ul>
+            <li>
+            <p><strong>Pegada Ecológica (gha per capita)</strong><br />
+              Fonte: Global Footprint Network<br />
+            <a href="https://data.footprintnetwork.org/" target="_blank">https://data.footprintnetwork.org/</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Emissões de CO₂ per capita (toneladas)</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/co2-emissions-per-capita" target="_blank">https://ourworldindata.org/grapher/co2-emissions-per-capita</a><br />
+              <br></p>
+            </li>
+            </ul>
+            <hr />
+            <h2 id="indicadores-institucionais-e-de-governanca">Indicadores Institucionais e de Governança</h2>
+            <ul>
+            <li>
+            <p><strong>Índice de Corrupção Política</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/political-corruption-index" target="_blank">https://ourworldindata.org/grapher/political-corruption-index</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Índice de Liberdade Econômica</strong><br />
+              Fonte: Fraser Institute<br />
+            <a href="https://www.fraserinstitute.org/economic-freedom/dataset" target="_blank">https://www.fraserinstitute.org/economic-freedom/dataset</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Índice de Democracia Liberal</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/liberal-democracy-index" target="_blank">https://ourworldindata.org/grapher/liberal-democracy-index</a><br />
+              <br></p>
+            </li>
+            </ul>
+            <hr />
+            <h2 id="indicadores-demograficos">Indicadores Demográficos</h2>
+            <ul>
+            <li>
+            <p><strong>Taxa de Crescimento Populacional (anual %)</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/population-growth-rates" target="_blank">https://ourworldindata.org/grapher/population-growth-rates</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>População Urbana (% do total)</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/share-of-population-urban" target="_blank">https://ourworldindata.org/grapher/share-of-population-urban</a><br />
+              <br></p>
+            </li>
+            </ul>
+            <hr />
+            <h2 id="indicadores-culturais">Indicadores Culturais</h2>
+            <ul>
+            <li>
+            <p><strong>Despesas com Patrimônio Cultural e Natural per capita (USD)</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/expenditure-on-cultural-and-natural-heritage-per-capita" target="_blank">https://ourworldindata.org/grapher/expenditure-on-cultural-and-natural-heritage-per-capita</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Satisfação com a Vida (Cantril Ladder Score)</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/happiness-cantril-ladder" target="_blank">https://ourworldindata.org/grapher/happiness-cantril-ladder</a><br />
+              <br></p>
+            </li>
+            <li>
+            <p><strong>Índice de Cultura Democrática</strong><br />
+              Fonte: Our World in Data<br />
+            <a href="https://ourworldindata.org/grapher/democracy-index-eiu" target="_blank">https://ourworldindata.org/grapher/democracy-index-eiu</a><br />
+              <br></p>
+            </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Nova Seção: Esclarecimentos -->
+    <div id="esclarecimentos" class="dimension-content">
+        <div class="text-content">
+            <h1 id="esclarecimentos">Esclarecimentos</h1>
+            <h2 id="party-system-left-right-index-pslri">Party-System Left-Right Index (PSLRI)</h2>
+            <p>O <strong>Party-System Left-Right Index (PSLRI)</strong> é um índice que traduz, de forma simples, a orientação econômica de um sistema de partidos políticos em um valor único que varia de 0 (mais à esquerda) a 1 (mais à direita). </p>
+            <ul>
+            <li>Na prática, o PSLRI quantifica a posição econômica de um sistema de partidos:<ol>
+            <li>Cada partido recebe uma nota de 0 (mais à esquerda) a 1 (mais à direita), definida por especialistas.</li>
+            <li>Multiplica-se essa nota pela participação de cada partido no parlamento (proporção de cadeiras).</li>
+            <li>A soma de todas as notas ponderadas gera um único valor entre 0 e 1, refletindo a orientação econômica geral.</li>
+            </ol>
+            </li>
+            </ul>
+            <p>Dessa forma, o PSLRI apresenta um “retrato” da configuração econômica de todo o espectro partidário de um país em um determinado momento, facilitando comparações ao longo do tempo ou entre diferentes regimes.</p>
+            <p>Para conhecer em detalhes como o PSLRI é definido e calculado — incluindo fórmulas e procedimentos estatísticos — consulte o documento abaixo.</p>
+            <hr />
+            <p><strong>Referência</strong><br />
+            ANGIOLLO, F.; WIEBRECHT, F. From Individual Parties to Party Systems: A New Approach to Calculate Party Systems’ Variables. <em>V-Dem Working Paper</em>, n. 146, 2023. Disponível em: <a href="https://www.v-dem.net/media/publications/wp146.pdf" target="_blank">https://www.v-dem.net/media/publications/wp146.pdf</a>. Acesso em: 17 maio 2025. </p>
+            <p><br><br></p>
+            <h2 id="categorias-de-pslri-para-visualizacao">Categorias de PSLRI para Visualização</h2>
+            <p>Para facilitar a interpretação nos gráficos, dividi os valores do PSLRI em quatro faixas, definidas a partir da distribuição dos dados brutos:</p>
+            <p><strong>0,26–0,54 (Baixa Esquerda)</strong><br />
+            <strong>0,54–0,63 (Centro-Esquerda)</strong><br />
+            <strong>0,63–0,71 (Centro-Direita)</strong><br />
+            <strong>0,71–1,00 (Alta Direita)</strong> </p>
+            <p>⚠️ <strong>Importante:</strong> essas faixas foram criadas <strong>arbitrariamente</strong> para efeito de <strong>processamento e visualização</strong>. Elas não refletem definições oficiais de espectro político, mas sim subdivisões práticas para ajudar na análise.</p>
+            <p><br><br></p>
+            <h2 id="definicoes-de-regimes-politicos">Definições de Regimes Políticos</h2>
+            <p>O sistema de classificação utilizado divide os países em quatro categorias principais, considerando a existência e a qualidade das eleições e o respeito às liberdades civis:</p>
+            <ol>
+            <li>
+            <p><strong>Autocracia Fechada</strong><br />
+             Não há eleições multipartidárias livres; o poder permanece concentrado sem competição formal.</p>
+            </li>
+            <li>
+            <p><strong>Autocracia Eleitoral</strong><br />
+             Existem eleições com múltiplos partidos, mas o processo não é livre e justo: ocorrem restrições e irregularidades que garantem a manutenção dos governantes.</p>
+            </li>
+            <li>
+            <p><strong>Democracia Eleitoral</strong><br />
+             Realizam-se eleições livres e justas, com competição real entre partidos, embora outras liberdades (imprensa, associação) possam ser limitadas.</p>
+            </li>
+            <li>
+            <p><strong>Democracia Liberal</strong><br />
+             Além de eleições livres e justas, há plena garantia de direitos e liberdades individuais (liberdade de expressão, imprensa, associação), cumprindo um padrão mais elevado de governança democrática.</p>
+            </li>
+            </ol>
+            <p>Para chegar a essa tipologia, os autores combinam diversos indicadores do V-Dem, tais como: <br />
+            - Existência de eleições multipartidárias<br />
+            - Qualidade e integridade do processo eleitoral<br />
+            - Nível de direitos civis e participação política </p>
+            <hr />
+            <p><strong>Referência</strong><br />
+            LÜHRMANN, Anna; TANNENBERG, Marcus; LINDBERG, Staffan I. Regimes of the World (RoW): Opening New Avenues for the Comparative Study of Political Regimes. <em>Politics &amp; Governance</em>, v. 6, n. 1, p. 60–77, 2018. Disponível em: <a href="https://www.cogitatiopress.com/politicsandgovernance/article/view/1214" target="_blank">https://www.cogitatiopress.com/politicsandgovernance/article/view/1214</a>. Acesso em: 17 maio 2025.</p>
+        </div>
+    </div>
+
+
+    <!-- Seção Resumo (agora é a quarta) -->
+    <div id="resumo" class="dimension-content">
         <div class="indicator-title">Distribuição PSLRI e Regime</div>
         <object data="graficos_html/fig_pslri_regime.html" type="text/html"></object>
         <object data="graficos_html/fig_pslri_distribuicao.html" type="text/html"></object>
@@ -243,7 +633,7 @@
 
         <div class="indicator-title">Democracia Liberal</div>
         <object data="graficos_html/fig_democracia_liberal.html" type="text/html"></object>
-        <object data="graficos_html/fig_democracia_liberal_pslri.html" type="text/html"></object>
+        <object data-"graficos_html/fig_democracia_liberal_pslri.html" type="text/html"></object>
     </div>
 
     <div id="demograficos" class="dimension-content">
@@ -271,3 +661,4 @@
     </div>
 </body>
 </html>
+
