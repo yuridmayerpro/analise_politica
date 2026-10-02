@@ -2,663 +2,1846 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Gráficos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Análise Política · Indicadores por regime e orientação política</title>
+    <meta name="description" content="Indicadores econômicos, sociais, ambientais, institucionais e culturais comparados por regime político e pela orientação política dos sistemas partidários (PSLRI).">
+    <meta name="theme-color" content="#ffffff">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:title" content="Análise Política · Indicadores por regime e orientação política">
+    <meta property="og:description" content="Indicadores econômicos, sociais, ambientais, institucionais e culturais comparados por regime político e pela orientação política dos sistemas partidários (PSLRI).">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b63ce'/%3E%3Cpath d='M9 24v-8M16 24V9M23 24v-5' stroke='%23fff' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <script>document.documentElement.classList.add('js');</script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5a9;
-            margin: 0;
-            padding: 0;
-            transition: margin-left 0.3s ease; /* Transição suave ao recolher o menu */
-        }
-
-        /* Largura padrão do menu */
+        /* ==========================================================
+           Cores, tamanhos e fontes (altere aqui para mudar o visual)
+           ========================================================== */
         :root {
-            --menu-width: 250px;
+            --bg: #f3f5f8;
+            --surface: #ffffff;
+            --surface-2: #f7f9fc;
+            --text: #172033;
+            --text-2: #475467;
+            --muted: #667085;
+            --border: #e4e7ec;
+            --accent: #0b63ce;
+            --accent-strong: #0950a8;
+            --accent-soft: #eaf2fd;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .06);
+            --shadow-lg: 0 12px 32px rgba(16, 24, 40, .14);
+            --sidebar-w: 288px;
+            --topbar-h: 56px;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color-scheme: light;
         }
 
-        #menu {
-            width: var(--menu-width);
-            position: fixed;
-            top: 0;
-            left: 0;
-            padding: 10px;
-            border-right: 1px solid #ddd;
-            height: 100vh;
-            overflow-y: auto;
-            background-color: #fff;
-            transition: width 0.3s ease; /* transição ao recolher */
-            z-index: 998;
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
 
-        /* Botão para recolher/expandir o menu */
-        #menu-toggle {
-            position: fixed;
-            top: 10px;
-            left: var(--menu-width);
-            transform: translateX(-100%);
-            background: #007BFF;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            transition: left 0.3s ease;
-            z-index: 999; /* Ficar sobre o menu */
-            border-radius: 0 4px 4px 0;
+        body {
+            margin: 0;
+            font-family: var(--font);
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            -webkit-font-smoothing: antialiased;
         }
 
-        #menu h3 {
-            margin-top: 20px;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            padding: 8px 5px;
+        a { color: var(--accent); }
+        a:hover { color: var(--accent-strong); }
+
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
             border-radius: 4px;
         }
+        [tabindex="-1"]:focus { outline: none; }
 
-        #menu h3:hover {
-            color: #007BFF;
-            background-color: #f0f0f0;
-        }
-
-        #menu h3.selected {
-            background-color: #007BFF;
-            color: white;
-            padding-left: 10px;
-        }
-
-        .dimension-content {
-            display: none;
-            margin-left: calc(var(--menu-width) + 20px);
-            padding: 10px;
-            transition: margin-left 0.3s ease;
-        }
-
-        .dimension-content.active {
-            display: block;
-            height: calc(100vh - 20px);
-            overflow-y: auto;
-        }
-
-        .dimension-content object {
-            border: none;
-            display: block;
-            margin-bottom: 10px;
-            width: auto; 
-            height: auto;
-        }
-
-        .indicator-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 30px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-        }
-
-        /* Estilos para o conteúdo de texto (Início, Fontes de Dados, Esclarecimentos) */
-        .text-content {
-            max-width: 800px; /* Limita a largura para melhor legibilidade */
-            margin: 20px; /* Espaçamento do conteúdo */
-            padding: 25px;
-            background-color: #fff; /* Fundo branco para o texto */
-            border-radius: 8px; /* Cantos arredondados */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra suave */
-            line-height: 1.6; /* Espaçamento entre linhas */
-            color: #333;
-        }
-
-        .text-content h1, .text-content h2 {
-            font-size: 24px;
-            font-weight: bold;
-            margin-top: 0;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #007BFF; /* Linha azul abaixo do título principal */
-            padding-bottom: 10px;
-            color: #333;
-        }
-        
-        .text-content h2 {
-            font-size: 20px;
-            margin-top: 30px;
-        }
-
-        .text-content h4 {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            color: #007BFF; /* Cor azul para subtítulos */
-        }
-
-        .text-content p {
-            margin-bottom: 15px;
-            color: #555; /* Cor de texto mais suave */
-        }
-        
-        .text-content a {
-            color: #007BFF;
+        .skip-link {
+            position: absolute;
+            left: 12px;
+            top: -60px;
+            z-index: 100;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
             text-decoration: none;
         }
-        .text-content a:hover {
-            text-decoration: underline;
-        }
+        .skip-link:focus { top: 12px; color: #fff; }
 
-        .text-content ul, .text-content ol {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .text-content ul {
-            list-style-type: disc; /* Marcadores de lista padrão */
-        }
-        
-        .text-content ol {
-            list-style-type: decimal;
-        }
-
-        .text-content li {
-            margin-bottom: 10px; /* Mais espaço entre itens de lista */
-        }
-
-        .text-content strong {
-            color: #000; /* Destaque mais forte para negrito */
-            font-weight: 600;
-        }
-
-        .text-content hr {
-            border: 0;
-            border-top: 1px solid #eee;
-            margin: 30px 0;
-        }
-        
-        .text-content ol li {
-            margin-bottom: 15px; /* Mais espaço em listas ordenadas */
-        }
-        
-        .text-content ol ol li {
-            margin-bottom: 5px; /* Menos espaço em sub-listas */
-        }
-
-
-        /* Estado do menu recolhido */
-        body.collapsed #menu {
-            width: 0;
+        .icon-btn {
+            display: inline-grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
             padding: 0;
-            overflow: hidden;
-            border: none;
+            border: 0;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
         }
+        .icon-btn:hover { background: var(--surface-2); }
 
-        body.collapsed #menu h3 {
-            display: none; /* Esconder itens do menu ao recolher */
-        }
+        /* ==========================================================
+           Menu lateral (computador) / gaveta (celular)
+           ========================================================== */
+        .topbar { display: none; }
+        .backdrop { display: none; }
 
-        body.collapsed #menu-toggle {
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
             left: 0;
-            transform: none;
-            border-radius: 0 4px 4px 0;
+            width: var(--sidebar-w);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 24px 14px 32px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
         }
 
-        body.collapsed .dimension-content {
-            margin-left: 20px;
+        .sidebar-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
-        body.collapsed .text-content {
-             margin-left: 40px; /* Ajusta margem do texto quando menu recolhido */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 10px;
+            color: inherit;
+            text-decoration: none;
+        }
+        .brand:hover { color: inherit; }
+
+        .brand-mark {
+            display: grid;
+            place-items: center;
+            flex: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .brand-name {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .brand-tagline {
+            display: block;
+            font-size: 12.5px;
+            line-height: 1.35;
+            color: var(--muted);
+        }
+
+        .menu-close { display: none; }
+
+        .nav-label {
+            margin: 22px 12px 6px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .nav-link {
+            display: block;
+            margin: 2px 0;
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            color: var(--text-2);
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.35;
+            text-decoration: none;
+        }
+        .nav-link:hover {
+            background: var(--surface-2);
+            color: var(--text);
+        }
+        .nav-link[aria-current="page"] {
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+            font-weight: 600;
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+
+        /* ==========================================================
+           Área de conteúdo
+           ========================================================== */
+        main {
+            margin-left: var(--sidebar-w);
+            padding: 40px clamp(20px, 4vw, 56px) 56px;
+        }
+
+        .page {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .js .page { display: none; }
+        .js .page.is-active {
+            display: block;
+            animation: page-in .2s ease-out;
+        }
+
+        @keyframes page-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .lead {
+            margin: 0;
+            max-width: 70ch;
+            font-size: clamp(1.02rem, .98rem + .3vw, 1.12rem);
+            color: var(--text-2);
+        }
+
+        .touch-hint { display: none; }
+        @media (hover: none) and (pointer: coarse) {
+            .touch-hint { display: inline; }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 10px 18px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--surface);
+            color: var(--text);
+            font: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            border-color: #c9d5e6;
+            color: var(--text);
+        }
+        .btn-primary {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            border-color: var(--accent-strong);
+            background: var(--accent-strong);
+            color: #fff;
+        }
+
+        /* Página inicial */
+        .hero {
+            max-width: 860px;
+            padding: 8px 0 32px;
+        }
+        .hero h1 {
+            margin: 0 0 14px;
+            font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.6rem);
+            line-height: 1.15;
+            letter-spacing: -.02em;
+        }
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .section-title {
+            margin: 48px 0 16px;
+            font-size: clamp(1.25rem, 1.1rem + .6vw, 1.5rem);
+            line-height: 1.25;
+            letter-spacing: -.01em;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 14px;
+        }
+        .card {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 18px 18px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            color: var(--text);
+            text-decoration: none;
+            transition: border-color .15s, box-shadow .15s, transform .15s;
+        }
+        .card:hover {
+            border-color: #bcd0ee;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+            color: var(--text);
+        }
+        .card-title {
+            font-weight: 650;
+            line-height: 1.3;
+        }
+        .card-meta {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-strong);
+        }
+        .card-topics {
+            font-size: 13.5px;
+            line-height: 1.45;
+            color: var(--muted);
+        }
+
+        /* Textos (Início, Fontes de Dados, Esclarecimentos) */
+        .prose {
+            max-width: 860px;
+            padding: clamp(20px, 4vw, 40px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            color: var(--text-2);
+        }
+        .prose h1,
+        .prose h2 {
+            color: var(--text);
+            line-height: 1.25;
+            letter-spacing: -.01em;
+        }
+        .prose h1 {
+            margin: 0 0 18px;
+            font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+        }
+        .prose h2 {
+            margin: 40px 0 12px;
+            font-size: clamp(1.2rem, 1.1rem + .5vw, 1.45rem);
+        }
+        .prose > h1:first-child,
+        .prose > h2:first-child { margin-top: 0; }
+        .prose > h1:first-child + h2 { margin-top: 24px; }
+        .prose > h1:first-child::after,
+        .prose > h2:first-child::after {
+            content: "";
+            display: block;
+            width: 48px;
+            height: 3px;
+            margin-top: 12px;
+            border-radius: 3px;
+            background: var(--accent);
+        }
+        .prose h4 {
+            margin: 28px 0 8px;
+            font-size: 1.08rem;
+            color: var(--accent-strong);
+        }
+        .prose p { margin: 0 0 14px; }
+        .prose ul,
+        .prose ol {
+            margin: 0 0 18px;
+            padding-left: 1.3em;
+        }
+        .prose li { margin-bottom: 8px; }
+        .prose li > p { margin: 0; }
+        .prose li > ol,
+        .prose li > ul { margin: 8px 0 0; }
+        .prose strong {
+            color: var(--text);
+            font-weight: 650;
+        }
+        .prose a {
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
+            overflow-wrap: anywhere;
+        }
+        .prose hr {
+            margin: 28px 0;
+            border: 0;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Páginas de gráficos */
+        .page-header {
+            max-width: 860px;
+            margin: 4px 0 8px;
+        }
+        .page-header h1 {
+            margin: 0 0 10px;
+            font-size: clamp(1.6rem, 1.25rem + 1.6vw, 2.25rem);
+            line-height: 1.15;
+            letter-spacing: -.02em;
+        }
+
+        .group { margin-top: 36px; }
+        .group-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 14px;
+            font-size: 1.15rem;
+            line-height: 1.3;
+        }
+        .group-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .chart {
+            container-type: inline-size;
+            margin: 0 0 20px;
+            padding: clamp(14px, 2.5vw, 24px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+        .chart-head { margin-bottom: 14px; }
+        .chart-title {
+            margin: 0 0 6px;
+            font-size: clamp(1.02rem, .95rem + .4vw, 1.2rem);
+            line-height: 1.3;
+            letter-spacing: -.005em;
+            color: var(--text);
+        }
+        .chart-subtitle {
+            margin: 0;
+            font-size: .95rem;
+            line-height: 1.5;
+            color: var(--text-2);
+        }
+        /* Palavras que o gráfico destaca com a cor da categoria: texto escuro + sublinhado colorido */
+        .tone {
+            text-decoration-line: underline;
+            text-decoration-color: var(--tone);
+            text-decoration-thickness: .2em;
+            text-underline-offset: .22em;
+            text-decoration-skip-ink: none;
+        }
+
+        .chart-body {
+            display: grid;
+            gap: 16px;
+        }
+        .chart-plot {
+            width: 100%;
+            min-width: 0;
+        }
+        .chart-note {
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius-sm);
+            background: var(--surface-2);
+            font-size: .93rem;
+            line-height: 1.55;
+            color: var(--text-2);
+        }
+        .chart-note p { margin: 0; }
+        .chart-note b,
+        .chart-note strong { color: var(--text); }
+        .chart-note-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* Texto explicativo ao lado do gráfico quando há espaço */
+        @container (min-width: 1060px) {
+            .chart-body {
+                grid-template-columns: minmax(0, 1fr) 290px;
+                align-items: start;
+            }
+        }
+
+        .js .chart-fallback { display: none; }
+        .chart-loading {
+            display: grid;
+            place-items: center;
+            min-height: 360px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(90deg, #f2f4f7 25%, #e8ecf1 37%, #f2f4f7 63%);
+            background-size: 400% 100%;
+            color: var(--muted);
+            font-size: .95rem;
+            animation: shimmer 1.4s ease infinite;
+        }
+        @keyframes shimmer {
+            from { background-position: 100% 50%; }
+            to { background-position: 0 50%; }
+        }
+
+        .chart-error {
+            display: grid;
+            place-items: center;
+            gap: 12px;
+            min-height: 200px;
+            padding: 20px;
+            text-align: center;
+            color: var(--text-2);
+        }
+        .chart-error p { margin: 0; }
+        .chart-error div {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Navegação "anterior / próxima" */
+        .pager {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 40px;
+        }
+        .pager a {
+            display: block;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text);
+            font-weight: 600;
+            line-height: 1.35;
+            text-decoration: none;
+        }
+        .pager a:hover {
+            border-color: #bcd0ee;
+            color: var(--accent-strong);
+        }
+        .pager small {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--muted);
+        }
+        .pager .next {
+            grid-column: 2;
+            text-align: right;
+        }
+
+        .site-footer {
+            max-width: 1280px;
+            margin: 48px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 13.5px;
+            color: var(--muted);
+        }
+        .site-footer p { margin: 0; }
+
+        /* ==========================================================
+           Celular e tablet
+           ========================================================== */
+        @media (max-width: 1023.98px) {
+            html { scroll-padding-top: calc(var(--topbar-h) + 12px); }
+
+            .topbar {
+                position: sticky;
+                top: 0;
+                z-index: 30;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                height: var(--topbar-h);
+                padding: 0 12px 0 max(6px, env(safe-area-inset-left));
+                border-bottom: 1px solid var(--border);
+                background: rgba(255, 255, 255, .94);
+                -webkit-backdrop-filter: saturate(180%) blur(10px);
+                backdrop-filter: saturate(180%) blur(10px);
+            }
+            .topbar-title {
+                overflow: hidden;
+                font-size: 15.5px;
+                font-weight: 650;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            .sidebar {
+                z-index: 50;
+                width: min(86vw, 320px);
+                padding-top: max(16px, env(safe-area-inset-top));
+                padding-bottom: max(32px, env(safe-area-inset-bottom));
+                visibility: hidden;
+                transform: translateX(-100%);
+                transition: transform .25s ease, visibility 0s linear .25s;
+            }
+            body.menu-open .sidebar {
+                visibility: visible;
+                transform: none;
+                box-shadow: var(--shadow-lg);
+                transition: transform .25s ease;
+            }
+            .menu-close { display: inline-grid; }
+
+            .nav-link { padding: 11px 12px; }
+
+            .backdrop {
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                z-index: 40;
+                display: block;
+                background: rgba(15, 23, 42, .45);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .25s ease;
+            }
+            body.menu-open .backdrop {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            body.menu-open { overflow: hidden; }
+
+            main {
+                margin-left: 0;
+                padding: 24px 16px 40px;
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .hero { padding-bottom: 24px; }
+            .actions .btn {
+                flex: 1 1 100%;
+                justify-content: center;
+            }
+            .group { margin-top: 28px; }
+            .chart-loading { min-height: 300px; }
+            .pager { grid-template-columns: 1fr; }
+            .pager .next { grid-column: auto; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+            }
         }
     </style>
+</head>
+<body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <!-- Barra do topo: aparece só em telas pequenas (celular e tablet) -->
+    <header class="topbar">
+        <button id="menu-toggle" class="icon-btn" type="button" aria-controls="menu" aria-expanded="false" aria-label="Abrir menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <span id="topbar-title" class="topbar-title">Início</span>
+    </header>
+    <div id="backdrop" class="backdrop"></div>
+
+    <!-- Menu lateral -->
+    <nav id="menu" class="sidebar" aria-label="Seções do site">
+        <div class="sidebar-head">
+            <a class="brand" href="#inicio">
+                <span class="brand-mark">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 19v-6M12 19V6M18 19v-4"/></svg>
+                </span>
+                <span>
+                    <span class="brand-name">Análise Política</span>
+                    <span class="brand-tagline">Indicadores por regime e orientação política</span>
+                </span>
+            </a>
+            <button id="menu-close" class="icon-btn menu-close" type="button" aria-label="Fechar menu">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+        </div>
+        <p class="nav-label">Sobre</p>
+        <a class="nav-link" href="#inicio" data-page="inicio">Início</a>
+        <a class="nav-link" href="#fontes" data-page="fontes">Fontes de Dados</a>
+        <a class="nav-link" href="#esclarecimentos" data-page="esclarecimentos">Esclarecimentos</a>
+        <p class="nav-label">Análises</p>
+        <a class="nav-link" href="#resumo" data-page="resumo">Resumo dos Regimes e Composição Política</a>
+        <a class="nav-link" href="#economicos" data-page="economicos">Indicadores Econômicos</a>
+        <a class="nav-link" href="#humanos" data-page="humanos">Indicadores de Desenvolvimento Humano</a>
+        <a class="nav-link" href="#sociais" data-page="sociais">Indicadores Sociais</a>
+        <a class="nav-link" href="#ambientais" data-page="ambientais">Indicadores Ambientais e de Sustentabilidade</a>
+        <a class="nav-link" href="#institucionais" data-page="institucionais">Indicadores Institucionais e de Governança</a>
+        <a class="nav-link" href="#demograficos" data-page="demograficos">Indicadores Demográficos</a>
+        <a class="nav-link" href="#culturais" data-page="culturais">Indicadores Culturais</a>
+    </nav>
+
+    <main id="conteudo" tabindex="-1">
+        <!-- ================= Início ================= -->
+        <section id="inicio" class="page" data-title="Início">
+            <header class="hero">
+                <p class="eyebrow">Ciência de dados · Dados abertos</p>
+                <h1>O que os indicadores revelam sobre orientação política e tipo de regime</h1>
+                <p class="lead">43 gráficos que comparam indicadores econômicos, sociais, ambientais, institucionais e culturais por <strong>regime político</strong> e pelo índice <strong>Left-Right (PSLRI)</strong>.</p>
+                <div class="actions">
+                    <a class="btn btn-primary" href="#resumo">Ver os gráficos <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    <a class="btn" href="#esclarecimentos">Como ler os dados</a>
+                </div>
+            </header>
+
+            <article class="prose">
+                <h2>Sobre esta análise</h2>
+
+                <p>Sou cientista de dados e, ao longo deste projeto, decidi avaliar por conta própria o que diversos indicadores socioeconômicos e culturais revelam sobre <strong>orientações políticas (direita/esquerda)</strong> e <strong>tipos de regime</strong>. Meu objetivo foi conduzir uma análise transparente e imparcial – uma “análise de peito aberto” – que se baseia unicamente em cruzamentos de diferentes fontes de <strong>dados oficiais e reconhecidos</strong>, sem recorrer a pressupostos ideológicos ou interpretações prévias.</p>
+
+                <h4>Surpresas e Aprendizados</h4>
+                <p>Fiquei surpreso com algumas das informações que os dados revelaram – e, inclusive, algumas chegaram a contrariar minhas ideias iniciais – porém, como cientista de dados, pude <strong>refinar meu entendimento e ajustar minhas hipóteses</strong> com base nas evidências analisadas.</p>
+
+                <p>Esta é uma investigação inicial, focada em identificar <strong>tendências gerais e relações</strong> entre variáveis como:</p>
+                <ul>
+                    <li>PIB</li>
+                    <li>IDH</li>
+                    <li>Desigualdade</li>
+                    <li>Meio ambiente</li>
+                    <li>Democracia</li>
+                </ul>
+
+                <p>Não me aprofundei ainda em análises estatísticas avançadas ou em modelos complexos: aqui, você encontrará um panorama direto dos <strong>dados brutos</strong>, organizado por <strong>regime político</strong> e pelo índice <strong>Left-Right (PSLRI)</strong>.</p>
+
+                <p>Nas visualizações (boxplots), cada caixa sintetiza a distribuição histórica de um indicador – considerando praticamente todos os países ao longo dos anos – para cada regime ou orientação política, funcionando como um “retrato” das conjunturas ao longo do tempo e destacando as tendências gerais e as relações entre as variáveis.</p>
+
+                <hr>
+
+                <p><strong>Não aceite passivamente nenhuma conclusão</strong> – nem as minhas, nem as de terceiros. Convido você a <strong>explorar os conjuntos de dados originais</strong>, verificar cada fonte e reproduzir os cálculos.<br>
+                Só assim podemos <strong>formar nossas próprias opiniões</strong> de forma consciente e responsável.</p>
+            </article>
+
+            <section aria-labelledby="explorar">
+                <h2 id="explorar" class="section-title">Explore os indicadores</h2>
+                <div class="cards">
+                    <a class="card" href="#resumo">
+                        <span class="card-title">Resumo dos Regimes e Composição Política</span>
+                        <span class="card-meta">2 gráficos</span>
+                        <span class="card-topics">Distribuição PSLRI e Regime</span>
+                    </a>
+                    <a class="card" href="#economicos">
+                        <span class="card-title">Indicadores Econômicos</span>
+                        <span class="card-meta">9 gráficos</span>
+                        <span class="card-topics">PIB e Qualidade de Vida · PIB por Regime e PSLRI · Crescimento do PIB · Índice de Gini · Balança Comercial</span>
+                    </a>
+                    <a class="card" href="#humanos">
+                        <span class="card-title">Indicadores de Desenvolvimento Humano</span>
+                        <span class="card-meta">6 gráficos</span>
+                        <span class="card-topics">IDH por Regime e PSLRI · Expectativa de Vida · Alfabetização</span>
+                    </a>
+                    <a class="card" href="#sociais">
+                        <span class="card-title">Indicadores Sociais</span>
+                        <span class="card-meta">6 gráficos</span>
+                        <span class="card-topics">Taxa de Pobreza · Desigualdade de Gênero · Taxa de Desemprego</span>
+                    </a>
+                    <a class="card" href="#ambientais">
+                        <span class="card-title">Indicadores Ambientais e de Sustentabilidade</span>
+                        <span class="card-meta">4 gráficos</span>
+                        <span class="card-topics">Pegada Ecológica · Emissões de CO₂</span>
+                    </a>
+                    <a class="card" href="#institucionais">
+                        <span class="card-title">Indicadores Institucionais e de Governança</span>
+                        <span class="card-meta">6 gráficos</span>
+                        <span class="card-topics">Corrupção Política · Liberdade Econômica · Democracia Liberal</span>
+                    </a>
+                    <a class="card" href="#demograficos">
+                        <span class="card-title">Indicadores Demográficos</span>
+                        <span class="card-meta">4 gráficos</span>
+                        <span class="card-topics">Crescimento Populacional · População Urbana</span>
+                    </a>
+                    <a class="card" href="#culturais">
+                        <span class="card-title">Indicadores Culturais</span>
+                        <span class="card-meta">6 gráficos</span>
+                        <span class="card-topics">Despesas Culturais · Satisfação com a Vida · Cultura Democrática</span>
+                    </a>
+                </div>
+            </section>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="next" href="#fontes"><small>Próxima →</small>Fontes de Dados</a>
+            </nav>
+        </section>
+
+        <!-- ================= Fontes de Dados ================= -->
+        <section id="fontes" class="page" data-title="Fontes de Dados">
+            <article class="prose">
+                <h1 id="fontes-de-dados-utilizadas">Fontes de dados utilizadas</h1>
+                <p>Nesta página você encontra todas as fontes de dados utilizadas neste projeto.<br />
+                Os links para cada fonte estão detalhados em seguida.</p>
+                <p>Fontes:</p>
+                <ul>
+                <li><strong>Our World in Data</strong></li>
+                <li><strong>Varieties of Democracy (V-Dem)</strong></li>
+                <li><strong>Banco Mundial (World Bank)</strong></li>
+                <li><strong>Global Footprint Network</strong></li>
+                <li><strong>Fraser Institute</strong></li>
+                </ul>
+                <p>Para mais detalhes sobre as metodologias empregadas, o escopo dos indicadores e os processos de coleta de dados de cada instituição, consulte diretamente os sites oficiais de cada fonte.  </p>
+                <hr />
+                <h2 id="resumo-dos-regimes-e-composicao-politica">Resumo dos Regimes e Composição Política</h2>
+                <ul>
+                <li>
+                <p><strong>Regime Político</strong><br />
+                  Fonte: <em>Our World in Data</em>, Political Regime dataset<br />
+                <a href="https://ourworldindata.org/grapher/political-regime" target="_blank">https://ourworldindata.org/grapher/political-regime</a></p>
+                </li>
+                <li>
+                <p><strong>Party-System Left-Right Index (PSLRI)</strong><br />
+                  Fonte: <em>Varieties of Democracy (V-Dem)</em>, Country–Year Full + Others v14<br />
+                <a href="https://www.v-dem.net/data/the-v-dem-dataset/country-year-v-dem-fullothers-v14/" target="_blank">https://www.v-dem.net/data/the-v-dem-dataset/country-year-v-dem-fullothers-v14/</a></p>
+                </li>
+                </ul>
+                <hr />
+                <h2 id="indicadores-economicos">Indicadores Econômicos</h2>
+                <ul>
+                <li>
+                <p><strong>PIB per capita (PPC)</strong><br />
+                  Fonte: World Bank<br />
+                <a href="https://prosperitydata360.worldbank.org/en/indicator/WB+WDI+NY+GDP+PCAP+PP+KD" target="_blank">https://prosperitydata360.worldbank.org/en/indicator/WB+WDI+NY+GDP+PCAP+PP+KD</a></p>
+                </li>
+                <li>
+                <p><strong>Crescimento do PIB (anual %)</strong><br />
+                  Fonte: World Bank<br />
+                <a href="https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG" target="_blank">https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG</a></p>
+                </li>
+                <li>
+                <p><strong>Índice de Gini (Desigualdade)</strong><br />
+                  Fonte: World Bank<br />
+                <a href="https://data.worldbank.org/indicator/SI.POV.GINI" target="_blank">https://data.worldbank.org/indicator/SI.POV.GINI</a></p>
+                </li>
+                <li>
+                <p><strong>Balança Comercial (% do PIB)</strong><br />
+                  Fonte: World Bank<br />
+                <a href="https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS" target="_blank">https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS</a></p>
+                </li>
+                </ul>
+                <hr />
+                <h2 id="indicadores-de-desenvolvimento-humano">Indicadores de Desenvolvimento Humano</h2>
+                <ul>
+                <li>
+                <p><strong>Índice de Desenvolvimento Humano (IDH)</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/human-development-index" target="_blank">https://ourworldindata.org/grapher/human-development-index</a></p>
+                </li>
+                <li>
+                <p><strong>Expectativa de Vida ao Nascer</strong><br />
+                  Fonte: World Bank<br />
+                <a href="https://data.worldbank.org/indicator/SP.DYN.LE00.IN" target="_blank">https://data.worldbank.org/indicator/SP.DYN.LE00.IN</a></p>
+                </li>
+                <li>
+                <p><strong>Taxa de Alfabetização de Adultos (%)</strong><br />
+                  Fonte: World Bank<br />
+                <a href="https://data.worldbank.org/indicator/SE.ADT.LITR.ZS" target="_blank">https://data.worldbank.org/indicator/SE.ADT.LITR.ZS</a></p>
+                </li>
+                </ul>
+                <hr />
+                <h2 id="indicadores-sociais">Indicadores Sociais</h2>
+                <ul>
+                <li>
+                <p><strong>Taxa de Pobreza (extrema)</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://nyc3.digitaloceanspaces.com/owid-public/data/poverty/pip_dataset.csv" target="_blank">https://nyc3.digitaloceanspaces.com/owid-public/data/poverty/pip_dataset.csv</a></p>
+                </li>
+                <li>
+                <p><strong>Taxa de Desemprego (% da força de trabalho)</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/unemployment-rate" target="_blank">https://ourworldindata.org/grapher/unemployment-rate</a></p>
+                </li>
+                <li>
+                <p><strong>Índice de Desigualdade de Gênero (GII)</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/gender-inequality-index-from-the-human-development-report" target="_blank">https://ourworldindata.org/grapher/gender-inequality-index-from-the-human-development-report</a></p>
+                </li>
+                </ul>
+                <hr />
+                <h2 id="indicadores-ambientais-e-de-sustentabilidade">Indicadores Ambientais e de Sustentabilidade</h2>
+                <ul>
+                <li>
+                <p><strong>Pegada Ecológica (gha per capita)</strong><br />
+                  Fonte: Global Footprint Network<br />
+                <a href="https://data.footprintnetwork.org/" target="_blank">https://data.footprintnetwork.org/</a></p>
+                </li>
+                <li>
+                <p><strong>Emissões de CO₂ per capita (toneladas)</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/co2-emissions-per-capita" target="_blank">https://ourworldindata.org/grapher/co2-emissions-per-capita</a></p>
+                </li>
+                </ul>
+                <hr />
+                <h2 id="indicadores-institucionais-e-de-governanca">Indicadores Institucionais e de Governança</h2>
+                <ul>
+                <li>
+                <p><strong>Índice de Corrupção Política</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/political-corruption-index" target="_blank">https://ourworldindata.org/grapher/political-corruption-index</a></p>
+                </li>
+                <li>
+                <p><strong>Índice de Liberdade Econômica</strong><br />
+                  Fonte: Fraser Institute<br />
+                <a href="https://www.fraserinstitute.org/economic-freedom/dataset" target="_blank">https://www.fraserinstitute.org/economic-freedom/dataset</a></p>
+                </li>
+                <li>
+                <p><strong>Índice de Democracia Liberal</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/liberal-democracy-index" target="_blank">https://ourworldindata.org/grapher/liberal-democracy-index</a></p>
+                </li>
+                </ul>
+                <hr />
+                <h2 id="indicadores-demograficos">Indicadores Demográficos</h2>
+                <ul>
+                <li>
+                <p><strong>Taxa de Crescimento Populacional (anual %)</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/population-growth-rates" target="_blank">https://ourworldindata.org/grapher/population-growth-rates</a></p>
+                </li>
+                <li>
+                <p><strong>População Urbana (% do total)</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/share-of-population-urban" target="_blank">https://ourworldindata.org/grapher/share-of-population-urban</a></p>
+                </li>
+                </ul>
+                <hr />
+                <h2 id="indicadores-culturais">Indicadores Culturais</h2>
+                <ul>
+                <li>
+                <p><strong>Despesas com Patrimônio Cultural e Natural per capita (USD)</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/expenditure-on-cultural-and-natural-heritage-per-capita" target="_blank">https://ourworldindata.org/grapher/expenditure-on-cultural-and-natural-heritage-per-capita</a></p>
+                </li>
+                <li>
+                <p><strong>Satisfação com a Vida (Cantril Ladder Score)</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/happiness-cantril-ladder" target="_blank">https://ourworldindata.org/grapher/happiness-cantril-ladder</a></p>
+                </li>
+                <li>
+                <p><strong>Índice de Cultura Democrática</strong><br />
+                  Fonte: Our World in Data<br />
+                <a href="https://ourworldindata.org/grapher/democracy-index-eiu" target="_blank">https://ourworldindata.org/grapher/democracy-index-eiu</a></p>
+                </li>
+                </ul>
+            </article>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#inicio"><small>← Anterior</small>Início</a>
+                <a class="next" href="#esclarecimentos"><small>Próxima →</small>Esclarecimentos</a>
+            </nav>
+        </section>
+
+        <!-- ================= Esclarecimentos ================= -->
+        <section id="esclarecimentos" class="page" data-title="Esclarecimentos">
+            <article class="prose">
+                <h1>Esclarecimentos</h1>
+                <h2 id="party-system-left-right-index-pslri">Party-System Left-Right Index (PSLRI)</h2>
+                <p>O <strong>Party-System Left-Right Index (PSLRI)</strong> é um índice que traduz, de forma simples, a orientação econômica de um sistema de partidos políticos em um valor único que varia de 0 (mais à esquerda) a 1 (mais à direita). </p>
+                <ul>
+                <li>Na prática, o PSLRI quantifica a posição econômica de um sistema de partidos:<ol>
+                <li>Cada partido recebe uma nota de 0 (mais à esquerda) a 1 (mais à direita), definida por especialistas.</li>
+                <li>Multiplica-se essa nota pela participação de cada partido no parlamento (proporção de cadeiras).</li>
+                <li>A soma de todas as notas ponderadas gera um único valor entre 0 e 1, refletindo a orientação econômica geral.</li>
+                </ol>
+                </li>
+                </ul>
+                <p>Dessa forma, o PSLRI apresenta um “retrato” da configuração econômica de todo o espectro partidário de um país em um determinado momento, facilitando comparações ao longo do tempo ou entre diferentes regimes.</p>
+                <p>Para conhecer em detalhes como o PSLRI é definido e calculado — incluindo fórmulas e procedimentos estatísticos — consulte o documento abaixo.</p>
+                <hr />
+                <p><strong>Referência</strong><br />
+                ANGIOLLO, F.; WIEBRECHT, F. From Individual Parties to Party Systems: A New Approach to Calculate Party Systems’ Variables. <em>V-Dem Working Paper</em>, n. 146, 2023. Disponível em: <a href="https://www.v-dem.net/media/publications/wp146.pdf" target="_blank">https://www.v-dem.net/media/publications/wp146.pdf</a>. Acesso em: 17 maio 2025. </p>
+                <h2 id="categorias-de-pslri-para-visualizacao">Categorias de PSLRI para Visualização</h2>
+                <p>Para facilitar a interpretação nos gráficos, dividi os valores do PSLRI em quatro faixas, definidas a partir da distribuição dos dados brutos:</p>
+                <p><strong>0,26–0,54 (Baixa Esquerda)</strong><br />
+                <strong>0,54–0,63 (Centro-Esquerda)</strong><br />
+                <strong>0,63–0,71 (Centro-Direita)</strong><br />
+                <strong>0,71–1,00 (Alta Direita)</strong> </p>
+                <p>⚠️ <strong>Importante:</strong> essas faixas foram criadas <strong>arbitrariamente</strong> para efeito de <strong>processamento e visualização</strong>. Elas não refletem definições oficiais de espectro político, mas sim subdivisões práticas para ajudar na análise.</p>
+                <h2 id="definicoes-de-regimes-politicos">Definições de Regimes Políticos</h2>
+                <p>O sistema de classificação utilizado divide os países em quatro categorias principais, considerando a existência e a qualidade das eleições e o respeito às liberdades civis:</p>
+                <ol>
+                <li>
+                <p><strong>Autocracia Fechada</strong><br />
+                 Não há eleições multipartidárias livres; o poder permanece concentrado sem competição formal.</p>
+                </li>
+                <li>
+                <p><strong>Autocracia Eleitoral</strong><br />
+                 Existem eleições com múltiplos partidos, mas o processo não é livre e justo: ocorrem restrições e irregularidades que garantem a manutenção dos governantes.</p>
+                </li>
+                <li>
+                <p><strong>Democracia Eleitoral</strong><br />
+                 Realizam-se eleições livres e justas, com competição real entre partidos, embora outras liberdades (imprensa, associação) possam ser limitadas.</p>
+                </li>
+                <li>
+                <p><strong>Democracia Liberal</strong><br />
+                 Além de eleições livres e justas, há plena garantia de direitos e liberdades individuais (liberdade de expressão, imprensa, associação), cumprindo um padrão mais elevado de governança democrática.</p>
+                </li>
+                </ol>
+                <p>Para chegar a essa tipologia, os autores combinam diversos indicadores do V-Dem, tais como:</p>
+                <ul>
+                <li>Existência de eleições multipartidárias</li>
+                <li>Qualidade e integridade do processo eleitoral</li>
+                <li>Nível de direitos civis e participação política</li>
+                </ul>
+                <hr />
+                <p><strong>Referência</strong><br />
+                LÜHRMANN, Anna; TANNENBERG, Marcus; LINDBERG, Staffan I. Regimes of the World (RoW): Opening New Avenues for the Comparative Study of Political Regimes. <em>Politics &amp; Governance</em>, v. 6, n. 1, p. 60–77, 2018. Disponível em: <a href="https://www.cogitatiopress.com/politicsandgovernance/article/view/1214" target="_blank">https://www.cogitatiopress.com/politicsandgovernance/article/view/1214</a>. Acesso em: 17 maio 2025.</p>
+            </article>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#fontes"><small>← Anterior</small>Fontes de Dados</a>
+                <a class="next" href="#resumo"><small>Próxima →</small>Resumo dos Regimes e Composição Política</a>
+            </nav>
+        </section>
+
+        <!-- ================= Resumo dos Regimes e Composição Política ================= -->
+        <section id="resumo" class="page" data-title="Resumo dos Regimes e Composição Política">
+            <header class="page-header">
+                <p class="eyebrow">Análises</p>
+                <h1>Resumo dos Regimes e Composição Política</h1>
+                <p class="lead">Como os regimes políticos se distribuem ao longo do índice Left-Right (PSLRI). Veja as definições de cada categoria em <a href="#esclarecimentos">Esclarecimentos</a>.<span class="touch-hint"> Toque nos gráficos para ver os valores.</span></p>
+            </header>
+
+            <section class="group" aria-labelledby="distribuicao-pslri-e-regime">
+                <h2 class="group-title" id="distribuicao-pslri-e-regime">Distribuição PSLRI e Regime</h2>
+                <figure class="chart" data-fig="fig_pslri_regime"><a class="chart-fallback" href="graficos_html/fig_pslri_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_pslri_distribuicao"><a class="chart-fallback" href="graficos_html/fig_pslri_distribuicao.html">Abrir o gráfico</a></figure>
+            </section>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#esclarecimentos"><small>← Anterior</small>Esclarecimentos</a>
+                <a class="next" href="#economicos"><small>Próxima →</small>Indicadores Econômicos</a>
+            </nav>
+        </section>
+
+        <!-- ================= Indicadores Econômicos ================= -->
+        <section id="economicos" class="page" data-title="Indicadores Econômicos">
+            <header class="page-header">
+                <p class="eyebrow">Análises</p>
+                <h1>Indicadores Econômicos</h1>
+                <p class="lead">Cada gráfico compara a distribuição histórica do indicador por regime político e por orientação política (PSLRI). Veja como as categorias foram definidas em <a href="#esclarecimentos">Esclarecimentos</a>.<span class="touch-hint"> Toque nos gráficos para ver os valores.</span></p>
+            </header>
+
+            <section class="group" aria-labelledby="pib-e-qualidade-de-vida">
+                <h2 class="group-title" id="pib-e-qualidade-de-vida">PIB e Qualidade de Vida</h2>
+                <figure class="chart" data-fig="fig_pib_vida"><a class="chart-fallback" href="graficos_html/fig_pib_vida.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="pib-por-regime-e-pslri">
+                <h2 class="group-title" id="pib-por-regime-e-pslri">PIB por Regime e PSLRI</h2>
+                <figure class="chart" data-fig="fig_pib_regime"><a class="chart-fallback" href="graficos_html/fig_pib_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_pib_pslri"><a class="chart-fallback" href="graficos_html/fig_pib_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="crescimento-do-pib">
+                <h2 class="group-title" id="crescimento-do-pib">Crescimento do PIB</h2>
+                <figure class="chart" data-fig="fig_crescimento_pib"><a class="chart-fallback" href="graficos_html/fig_crescimento_pib.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_crescimento_pib_pslri"><a class="chart-fallback" href="graficos_html/fig_crescimento_pib_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="indice-de-gini">
+                <h2 class="group-title" id="indice-de-gini">Índice de Gini</h2>
+                <figure class="chart" data-fig="fig_gini_regime"><a class="chart-fallback" href="graficos_html/fig_gini_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_gini_pslri"><a class="chart-fallback" href="graficos_html/fig_gini_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="balanca-comercial">
+                <h2 class="group-title" id="balanca-comercial">Balança Comercial</h2>
+                <figure class="chart" data-fig="fig_balanca_regime"><a class="chart-fallback" href="graficos_html/fig_balanca_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_balanca_pslri"><a class="chart-fallback" href="graficos_html/fig_balanca_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#resumo"><small>← Anterior</small>Resumo dos Regimes e Composição Política</a>
+                <a class="next" href="#humanos"><small>Próxima →</small>Indicadores de Desenvolvimento Humano</a>
+            </nav>
+        </section>
+
+        <!-- ================= Indicadores de Desenvolvimento Humano ================= -->
+        <section id="humanos" class="page" data-title="Indicadores de Desenvolvimento Humano">
+            <header class="page-header">
+                <p class="eyebrow">Análises</p>
+                <h1>Indicadores de Desenvolvimento Humano</h1>
+                <p class="lead">Cada gráfico compara a distribuição histórica do indicador por regime político e por orientação política (PSLRI). Veja como as categorias foram definidas em <a href="#esclarecimentos">Esclarecimentos</a>.<span class="touch-hint"> Toque nos gráficos para ver os valores.</span></p>
+            </header>
+
+            <section class="group" aria-labelledby="idh-por-regime-e-pslri">
+                <h2 class="group-title" id="idh-por-regime-e-pslri">IDH por Regime e PSLRI</h2>
+                <figure class="chart" data-fig="fig_idh_regime_politico"><a class="chart-fallback" href="graficos_html/fig_idh_regime_politico.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_idh_pslri"><a class="chart-fallback" href="graficos_html/fig_idh_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="expectativa-de-vida">
+                <h2 class="group-title" id="expectativa-de-vida">Expectativa de Vida</h2>
+                <figure class="chart" data-fig="fig_expectativa_vida"><a class="chart-fallback" href="graficos_html/fig_expectativa_vida.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_expectativa_vida_pslri"><a class="chart-fallback" href="graficos_html/fig_expectativa_vida_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="alfabetizacao">
+                <h2 class="group-title" id="alfabetizacao">Alfabetização</h2>
+                <figure class="chart" data-fig="fig_alfabetizacao_politico"><a class="chart-fallback" href="graficos_html/fig_alfabetizacao_politico.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_alfabetizacao_pslri"><a class="chart-fallback" href="graficos_html/fig_alfabetizacao_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#economicos"><small>← Anterior</small>Indicadores Econômicos</a>
+                <a class="next" href="#sociais"><small>Próxima →</small>Indicadores Sociais</a>
+            </nav>
+        </section>
+
+        <!-- ================= Indicadores Sociais ================= -->
+        <section id="sociais" class="page" data-title="Indicadores Sociais">
+            <header class="page-header">
+                <p class="eyebrow">Análises</p>
+                <h1>Indicadores Sociais</h1>
+                <p class="lead">Cada gráfico compara a distribuição histórica do indicador por regime político e por orientação política (PSLRI). Veja como as categorias foram definidas em <a href="#esclarecimentos">Esclarecimentos</a>.<span class="touch-hint"> Toque nos gráficos para ver os valores.</span></p>
+            </header>
+
+            <section class="group" aria-labelledby="taxa-de-pobreza">
+                <h2 class="group-title" id="taxa-de-pobreza">Taxa de Pobreza</h2>
+                <figure class="chart" data-fig="fig_taxa_pobreza_regime"><a class="chart-fallback" href="graficos_html/fig_taxa_pobreza_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_taxa_pobreza_pslri"><a class="chart-fallback" href="graficos_html/fig_taxa_pobreza_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="desigualdade-de-genero">
+                <h2 class="group-title" id="desigualdade-de-genero">Desigualdade de Gênero</h2>
+                <figure class="chart" data-fig="fig_desigualdade_genero_regime"><a class="chart-fallback" href="graficos_html/fig_desigualdade_genero_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_desigualdade_genero_pslri"><a class="chart-fallback" href="graficos_html/fig_desigualdade_genero_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="taxa-de-desemprego">
+                <h2 class="group-title" id="taxa-de-desemprego">Taxa de Desemprego</h2>
+                <figure class="chart" data-fig="fig_taxa_desemprego_regime"><a class="chart-fallback" href="graficos_html/fig_taxa_desemprego_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_taxa_desemprego_pslri"><a class="chart-fallback" href="graficos_html/fig_taxa_desemprego_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#humanos"><small>← Anterior</small>Indicadores de Desenvolvimento Humano</a>
+                <a class="next" href="#ambientais"><small>Próxima →</small>Indicadores Ambientais e de Sustentabilidade</a>
+            </nav>
+        </section>
+
+        <!-- ================= Indicadores Ambientais e de Sustentabilidade ================= -->
+        <section id="ambientais" class="page" data-title="Indicadores Ambientais e de Sustentabilidade">
+            <header class="page-header">
+                <p class="eyebrow">Análises</p>
+                <h1>Indicadores Ambientais e de Sustentabilidade</h1>
+                <p class="lead">Cada gráfico compara a distribuição histórica do indicador por regime político e por orientação política (PSLRI). Veja como as categorias foram definidas em <a href="#esclarecimentos">Esclarecimentos</a>.<span class="touch-hint"> Toque nos gráficos para ver os valores.</span></p>
+            </header>
+
+            <section class="group" aria-labelledby="pegada-ecologica">
+                <h2 class="group-title" id="pegada-ecologica">Pegada Ecológica</h2>
+                <figure class="chart" data-fig="fig_pegada_ecologica_regime"><a class="chart-fallback" href="graficos_html/fig_pegada_ecologica_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_pegada_ecologica_pslri"><a class="chart-fallback" href="graficos_html/fig_pegada_ecologica_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="emissoes-de-co2">
+                <h2 class="group-title" id="emissoes-de-co2">Emissões de CO₂</h2>
+                <figure class="chart" data-fig="fig_emissoes_co2_politico"><a class="chart-fallback" href="graficos_html/fig_emissoes_co2_politico.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_emissoes_co2_pslri"><a class="chart-fallback" href="graficos_html/fig_emissoes_co2_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#sociais"><small>← Anterior</small>Indicadores Sociais</a>
+                <a class="next" href="#institucionais"><small>Próxima →</small>Indicadores Institucionais e de Governança</a>
+            </nav>
+        </section>
+
+        <!-- ================= Indicadores Institucionais e de Governança ================= -->
+        <section id="institucionais" class="page" data-title="Indicadores Institucionais e de Governança">
+            <header class="page-header">
+                <p class="eyebrow">Análises</p>
+                <h1>Indicadores Institucionais e de Governança</h1>
+                <p class="lead">Cada gráfico compara a distribuição histórica do indicador por regime político e por orientação política (PSLRI). Veja como as categorias foram definidas em <a href="#esclarecimentos">Esclarecimentos</a>.<span class="touch-hint"> Toque nos gráficos para ver os valores.</span></p>
+            </header>
+
+            <section class="group" aria-labelledby="corrupcao-politica">
+                <h2 class="group-title" id="corrupcao-politica">Corrupção Política</h2>
+                <figure class="chart" data-fig="fig_corrupcao_regime"><a class="chart-fallback" href="graficos_html/fig_corrupcao_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_corrupcao_pslri"><a class="chart-fallback" href="graficos_html/fig_corrupcao_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="liberdade-economica">
+                <h2 class="group-title" id="liberdade-economica">Liberdade Econômica</h2>
+                <figure class="chart" data-fig="fig_liberdade_economica"><a class="chart-fallback" href="graficos_html/fig_liberdade_economica.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_liberdade_economica_pslri"><a class="chart-fallback" href="graficos_html/fig_liberdade_economica_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="democracia-liberal">
+                <h2 class="group-title" id="democracia-liberal">Democracia Liberal</h2>
+                <figure class="chart" data-fig="fig_democracia_liberal"><a class="chart-fallback" href="graficos_html/fig_democracia_liberal.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_democracia_liberal_pslri"><a class="chart-fallback" href="graficos_html/fig_democracia_liberal_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#ambientais"><small>← Anterior</small>Indicadores Ambientais e de Sustentabilidade</a>
+                <a class="next" href="#demograficos"><small>Próxima →</small>Indicadores Demográficos</a>
+            </nav>
+        </section>
+
+        <!-- ================= Indicadores Demográficos ================= -->
+        <section id="demograficos" class="page" data-title="Indicadores Demográficos">
+            <header class="page-header">
+                <p class="eyebrow">Análises</p>
+                <h1>Indicadores Demográficos</h1>
+                <p class="lead">Cada gráfico compara a distribuição histórica do indicador por regime político e por orientação política (PSLRI). Veja como as categorias foram definidas em <a href="#esclarecimentos">Esclarecimentos</a>.<span class="touch-hint"> Toque nos gráficos para ver os valores.</span></p>
+            </header>
+
+            <section class="group" aria-labelledby="crescimento-populacional">
+                <h2 class="group-title" id="crescimento-populacional">Crescimento Populacional</h2>
+                <figure class="chart" data-fig="fig_crescimento_populacional_regime"><a class="chart-fallback" href="graficos_html/fig_crescimento_populacional_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_crescimento_populacional_pslri"><a class="chart-fallback" href="graficos_html/fig_crescimento_populacional_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="populacao-urbana">
+                <h2 class="group-title" id="populacao-urbana">População Urbana</h2>
+                <figure class="chart" data-fig="fig_populacao_urbana_regime"><a class="chart-fallback" href="graficos_html/fig_populacao_urbana_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_populacao_urbana_pslri"><a class="chart-fallback" href="graficos_html/fig_populacao_urbana_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#institucionais"><small>← Anterior</small>Indicadores Institucionais e de Governança</a>
+                <a class="next" href="#culturais"><small>Próxima →</small>Indicadores Culturais</a>
+            </nav>
+        </section>
+
+        <!-- ================= Indicadores Culturais ================= -->
+        <section id="culturais" class="page" data-title="Indicadores Culturais">
+            <header class="page-header">
+                <p class="eyebrow">Análises</p>
+                <h1>Indicadores Culturais</h1>
+                <p class="lead">Cada gráfico compara a distribuição histórica do indicador por regime político e por orientação política (PSLRI). Veja como as categorias foram definidas em <a href="#esclarecimentos">Esclarecimentos</a>.<span class="touch-hint"> Toque nos gráficos para ver os valores.</span></p>
+            </header>
+
+            <section class="group" aria-labelledby="despesas-culturais">
+                <h2 class="group-title" id="despesas-culturais">Despesas Culturais</h2>
+                <figure class="chart" data-fig="fig_despesas_culturais_politico"><a class="chart-fallback" href="graficos_html/fig_despesas_culturais_politico.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_despesas_culturais_pslri"><a class="chart-fallback" href="graficos_html/fig_despesas_culturais_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="satisfacao-com-a-vida">
+                <h2 class="group-title" id="satisfacao-com-a-vida">Satisfação com a Vida</h2>
+                <figure class="chart" data-fig="fig_satisfacao_vida_regime"><a class="chart-fallback" href="graficos_html/fig_satisfacao_vida_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_satisfacao_vida_pslri"><a class="chart-fallback" href="graficos_html/fig_satisfacao_vida_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+
+            <section class="group" aria-labelledby="cultura-democratica">
+                <h2 class="group-title" id="cultura-democratica">Cultura Democrática</h2>
+                <figure class="chart" data-fig="fig_cultura_democratica_regime"><a class="chart-fallback" href="graficos_html/fig_cultura_democratica_regime.html">Abrir o gráfico</a></figure>
+                <figure class="chart" data-fig="fig_cultura_democratica_pslri"><a class="chart-fallback" href="graficos_html/fig_cultura_democratica_pslri.html">Abrir o gráfico</a></figure>
+            </section>
+            <nav class="pager" aria-label="Navegação entre seções">
+                <a class="prev" href="#demograficos"><small>← Anterior</small>Indicadores Demográficos</a>
+            </nav>
+        </section>
+
+        <footer class="site-footer">
+            <p>Dados: Our World in Data, V-Dem, Banco Mundial, Global Footprint Network e Fraser Institute. Detalhes em <a href="#fontes">Fontes de Dados</a>.</p>
+        </footer>
+    </main>
+
     <script>
-        function toggleDimension(dimension) {
-            const contents = document.querySelectorAll('.dimension-content');
-            const menuItems = document.querySelectorAll('#menu h3');
-            
-            // Esconde todos os conteúdos e remove a seleção de todos os itens do menu
-            contents.forEach(content => content.classList.remove('active'));
-            menuItems.forEach(item => item.classList.remove('selected'));
-            
-            // Mostra o conteúdo selecionado e marca o item do menu
-            const selectedContent = document.getElementById(dimension);
-            const selectedMenu = document.querySelector(`#menu h3[onclick="toggleDimension('${dimension}')"]`);
-            
-            if (selectedContent) {
-                selectedContent.classList.add('active');
+    /*
+     * Como adicionar um gráfico novo:
+     *   1. Salve o gráfico Plotly em JSON na pasta graficos_json/ (ex.: fig.write_json("graficos_json/fig_nova.json")).
+     *   2. Coloque no HTML, dentro da seção desejada:
+     *        <figure class="chart" data-fig="fig_nova"></figure>
+     * O título, o subtítulo e o texto explicativo à direita do gráfico são lidos do próprio JSON
+     * e mostrados como texto da página, para que se ajustem a qualquer tamanho de tela.
+     */
+    (() => {
+        'use strict';
+
+        const SITE_NAME = 'Análise Política';
+        const DEFAULT_TITLE = document.title;
+
+        // Versão "cartesiana" do Plotly (tem box, violin, scatter e bar e é ~3x menor que a completa).
+        // Se ela não carregar, usa a versão completa, a mesma que o site usava antes.
+        const PLOTLY_SOURCES = [
+            {
+                src: 'https://cdn.jsdelivr.net/npm/plotly.js-cartesian-dist-min@2.35.2/plotly-cartesian.min.js',
+                integrity: 'sha384-gKF7EaMDoWW1zLWkouldmVWF5jqEKrAswAciW73iNzqlomabVVPO60XkJvL5q/Ie'
+            },
+            { src: 'https://cdn.plot.ly/plotly-2.35.2.min.js' }
+        ];
+
+        const body = document.body;
+        const main = document.getElementById('conteudo');
+        const menu = document.getElementById('menu');
+        const toggle = document.getElementById('menu-toggle');
+        const closeBtn = document.getElementById('menu-close');
+        const backdrop = document.getElementById('backdrop');
+        const topbarTitle = document.getElementById('topbar-title');
+        const pages = Array.from(document.querySelectorAll('.page'));
+        const links = Array.from(menu.querySelectorAll('a[data-page]'));
+        const desktop = window.matchMedia('(min-width: 1024px)');
+        const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+        const FONT = getComputedStyle(body).fontFamily;
+
+        /* ---------------- Menu (gaveta no celular) ---------------- */
+
+        function setMenu(open) {
+            body.classList.toggle('menu-open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+            if ('inert' in main) main.inert = open;
+        }
+
+        toggle.addEventListener('click', () => {
+            setMenu(true);
+            const current = menu.querySelector('[aria-current="page"]') || links[0];
+            current.focus({ preventScroll: true });
+        });
+        closeBtn.addEventListener('click', () => {
+            setMenu(false);
+            toggle.focus();
+        });
+        backdrop.addEventListener('click', () => setMenu(false));
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && body.classList.contains('menu-open')) {
+                setMenu(false);
+                toggle.focus();
             }
-            if (selectedMenu) {
-                selectedMenu.classList.add('selected');
+        });
+        // Se a tela crescer (ex.: girar o tablet), fecha a gaveta.
+        if (desktop.addEventListener) desktop.addEventListener('change', () => setMenu(false));
+        else if (desktop.addListener) desktop.addListener(() => setMenu(false)); // Safari antigo
+
+        document.querySelector('.skip-link').addEventListener('click', (event) => {
+            event.preventDefault();
+            main.focus();
+        });
+
+        /* ---------------- Navegação entre seções ---------------- */
+
+        let currentPage = null;
+
+        function showPage(page, target, moveFocus) {
+            const changed = page !== currentPage;
+            currentPage = page;
+            pages.forEach((p) => p.classList.toggle('is-active', p === page));
+            links.forEach((a) => {
+                if (a.dataset.page === page.id) a.setAttribute('aria-current', 'page');
+                else a.removeAttribute('aria-current');
+            });
+            topbarTitle.textContent = page.dataset.title;
+            document.title = page.id === 'inicio' ? DEFAULT_TITLE : page.dataset.title + ' · ' + SITE_NAME;
+            setMenu(false);
+
+            if (target) {
+                target.scrollIntoView();
+            } else if (changed || moveFocus) {
+                window.scrollTo(0, 0);
+            }
+            if (moveFocus) {
+                const heading = page.querySelector('h1');
+                if (heading) {
+                    heading.setAttribute('tabindex', '-1');
+                    heading.focus({ preventScroll: true });
+                }
+            }
+
+            if (page.querySelector('.chart[data-fig]')) {
+                loadPlotly().catch(() => {});
+                if (!('IntersectionObserver' in window)) {
+                    page.querySelectorAll('.chart[data-fig]').forEach(renderChart);
+                }
+                requestAnimationFrame(refreshCharts);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const objects = document.querySelectorAll('.dimension-content object');
-            const percentualAumento = 1.1; // Ajuste de tamanho dos gráficos
-            
-            objects.forEach(obj => {
-                obj.addEventListener('load', () => {
-                    // Tenta acessar o documento dentro do <object>
-                    try {
-                        const doc = obj.contentDocument || obj.contentWindow.document;
-                        if (!doc) return; // Sai se não conseguir acessar o documento (ex: cross-origin)
+        function route(initial) {
+            let id = '';
+            try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { id = ''; }
+            let target = id ? document.getElementById(id) : null;
+            let page = target ? target.closest('.page') : null;
+            if (!page) {
+                if (!initial && currentPage) return;
+                page = pages[0];
+                target = null;
+            }
+            if (target === page) target = null;
+            showPage(page, target, !initial && !target);
+        }
 
-                        const plotDiv = doc.querySelector('.plotly-graph-div');
-                        if (plotDiv) {
-                            const rect = plotDiv.getBoundingClientRect();
-                            const novaLargura = rect.width * percentualAumento;
-                            const novaAltura = rect.height * percentualAumento;
-                            obj.style.width = novaLargura + 'px';
-                            obj.style.height = novaAltura + 'px';
-                        }
-                    } catch (e) {
-                        console.warn("Não foi possível acessar o conteúdo do <object> para redimensionar:", obj.data, e);
+        window.addEventListener('hashchange', () => route(false));
+
+        // Tocar no item da seção em que já se está só fecha o menu e volta ao topo.
+        links.forEach((a) => a.addEventListener('click', () => {
+            if (a.dataset.page === (currentPage && currentPage.id) && location.hash === '#' + a.dataset.page) {
+                setMenu(false);
+                window.scrollTo(0, 0);
+            }
+        }));
+
+        /* ---------------- Carregamento do Plotly ---------------- */
+
+        let plotlyLoading = null;
+
+        function loadScript(source) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = source.src;
+                script.async = true;
+                if (source.integrity) {
+                    script.integrity = source.integrity;
+                    script.crossOrigin = 'anonymous';
+                }
+                script.onload = () => (window.Plotly ? resolve() : reject(new Error('Plotly ausente')));
+                script.onerror = () => {
+                    script.remove();
+                    reject(new Error('Falha ao carregar ' + source.src));
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        function loadPlotly() {
+            if (window.Plotly) return Promise.resolve(window.Plotly);
+            if (!plotlyLoading) {
+                plotlyLoading = PLOTLY_SOURCES
+                    .reduce((chain, source) => chain.catch(() => loadScript(source)), Promise.reject(new Error('início')))
+                    .then(() => window.Plotly)
+                    .catch((error) => {
+                        plotlyLoading = null;
+                        throw error;
+                    });
+            }
+            return plotlyLoading;
+        }
+
+        /* ---------------- Textos que vêm de dentro do gráfico ---------------- */
+
+        const ALLOWED_TAGS = new Set(['b', 'strong', 'i', 'em', 'span', 'br', 'sup', 'sub']);
+        const SAFE_COLOR = /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\)|[a-z]+)$/i;
+
+        // Converte o "HTML" do Plotly (<b>, <span style='color:...'>, <br>) em elementos da página.
+        // Trechos coloridos viram sublinhado na mesma cor (cores claras como amarelo são difíceis de ler como texto).
+        function richText(html) {
+            const template = document.createElement('template');
+            template.innerHTML = html;
+            const output = document.createDocumentFragment();
+            (function copy(from, to) {
+                from.childNodes.forEach((node) => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        to.appendChild(document.createTextNode(node.textContent));
+                        return;
+                    }
+                    if (node.nodeType !== Node.ELEMENT_NODE) return;
+                    const tag = node.tagName.toLowerCase();
+                    if (!ALLOWED_TAGS.has(tag)) {
+                        copy(node, to);
+                        return;
+                    }
+                    const element = document.createElement(tag);
+                    const color = /(?:^|;)\s*color\s*:\s*([^;]+)/i.exec(node.getAttribute('style') || '');
+                    if (color && SAFE_COLOR.test(color[1].trim())) {
+                        element.className = 'tone';
+                        element.style.setProperty('--tone', color[1].trim());
+                    }
+                    to.appendChild(element);
+                    copy(node, element);
+                });
+            })(template.content, output);
+            return output;
+        }
+
+        // Os textos explicativos têm <br> a cada ~45 letras para caber ao lado do gráfico.
+        // Aqui mantemos só as quebras de parágrafo e as que terminam frases.
+        function reflowNote(html) {
+            return html.split(/(?:<br\s*\/?>\s*){2,}/i).map((paragraph) =>
+                paragraph.split(/<br\s*\/?>/i).reduce((text, part) => {
+                    const before = text.replace(/<[^>]*>/g, '').trim();
+                    return text + (/[.!?:]$/.test(before) ? '<br>' : ' ') + part;
+                })
+            ).join('<br><br>');
+        }
+
+        function isSideNote(annotation) {
+            return annotation && annotation.xref === 'paper' && Number(annotation.x) >= 1;
+        }
+
+        // "Orientação Política (PSLRI)=0.26-0.54 (Baixa Esquerda)" -> "PSLRI 0.26-0.54 (Baixa Esquerda)"
+        function shortFacetLabel(text) {
+            const match = /^(.*?)=(.*)$/.exec(text || '');
+            if (!match) return text;
+            const abbreviation = /\(([^)]+)\)\s*$/.exec(match[1]);
+            return (abbreviation ? abbreviation[1] + ' ' : '') + match[2];
+        }
+
+        // Quebra um texto em linhas de até `max` letras.
+        // "0.54-0.63 (Centro-Esquerda)" -> "0.54-0.63<br>(Centro-<br>Esquerda)"; números como "0.26-0.54" ficam inteiros.
+        function wrapText(text, max) {
+            const words = [];
+            text.split(' ').forEach((word) => {
+                const hyphen = word.search(/[A-Za-zÀ-ÿ]-[A-Za-zÀ-ÿ]/);
+                if (word.length > max && hyphen >= 0) words.push(word.slice(0, hyphen + 2), word.slice(hyphen + 2));
+                else if (word) words.push(word);
+            });
+            const lines = [];
+            words.forEach((word) => {
+                const last = lines.length - 1;
+                const joiner = last >= 0 && /-$/.test(lines[last]) ? '' : ' ';
+                if (last >= 0 && (lines[last] + joiner + word).length <= max) lines[last] += joiner + word;
+                else lines.push(word);
+            });
+            return lines.join('<br>');
+        }
+
+        function categoriesOf(data, letter) {
+            const seen = new Set();
+            data.forEach((trace) => {
+                const values = trace[letter];
+                if (Array.isArray(values)) {
+                    values.forEach((value) => {
+                        if (typeof value === 'string') seen.add(value);
+                    });
+                }
+            });
+            return Array.from(seen);
+        }
+
+        function buildCard(layout) {
+            const fragment = document.createDocumentFragment();
+            const titleParts = String((layout.title && layout.title.text) || '').split(/<br\s*\/?>/i);
+
+            const head = document.createElement('figcaption');
+            head.className = 'chart-head';
+            const title = document.createElement('h3');
+            title.className = 'chart-title';
+            title.appendChild(richText(titleParts[0]));
+            head.appendChild(title);
+            const subtitleHtml = titleParts.slice(1).join(' ').trim();
+            if (subtitleHtml) {
+                const subtitle = document.createElement('p');
+                subtitle.className = 'chart-subtitle';
+                subtitle.appendChild(richText(subtitleHtml));
+                head.appendChild(subtitle);
+            }
+
+            const chartBody = document.createElement('div');
+            chartBody.className = 'chart-body';
+            const plot = document.createElement('div');
+            plot.className = 'chart-plot';
+            chartBody.appendChild(plot);
+
+            const notes = (layout.annotations || []).filter(isSideNote);
+            if (notes.length) {
+                const note = document.createElement('div');
+                note.className = 'chart-note';
+                const label = document.createElement('span');
+                label.className = 'chart-note-label';
+                label.textContent = 'Destaques';
+                const text = document.createElement('p');
+                text.appendChild(richText(notes.map((a) => reflowNote(a.text)).join('<br><br>')));
+                note.append(label, text);
+                chartBody.appendChild(note);
+            }
+
+            fragment.append(head, chartBody);
+            return fragment;
+        }
+
+        /* ---------------- Layout responsivo dos gráficos ---------------- */
+
+        function sizeOf(width) {
+            if (width < 560) return 's';
+            if (width < 900) return 'm';
+            return 'l';
+        }
+
+        function axisKeys(layout, letter) {
+            const pattern = new RegExp('^' + letter + 'axis\\d*$');
+            return Object.keys(layout)
+                .filter((key) => pattern.test(key))
+                .sort((a, b) => (parseInt(a.slice(5), 10) || 1) - (parseInt(b.slice(5), 10) || 1));
+        }
+
+        // Gráfico com vários painéis (ex.: PIB x Expectativa de Vida):
+        // 4 lado a lado no computador, 2x2 em telas médias e 1 por linha no celular.
+        function layoutFacets(layout, size, original) {
+            const xs = axisKeys(layout, 'x');
+            const ys = axisKeys(layout, 'y');
+            // Mesma fonte dos números em todos os painéis (no original só o 1º painel tinha fonte definida).
+            const xFont = layout.xaxis && layout.xaxis.tickfont;
+            const yFont = layout.yaxis && layout.yaxis.tickfont;
+            xs.forEach((key) => { if (xFont && !layout[key].tickfont) layout[key].tickfont = Object.assign({}, xFont); });
+            ys.forEach((key) => { if (yFont && !layout[key].tickfont) layout[key].tickfont = Object.assign({}, yFont); });
+            if (size === 'l') {
+                layout.height = original.height;
+                return;
+            }
+            const cols = size === 's' ? 1 : 2;
+            const rows = Math.ceil(xs.length / cols);
+            const panel = size === 's' ? 220 : 260;
+            const gap = size === 's' ? 96 : 72;
+            const top = 36;
+            const bottom = 64;
+            const area = rows * panel + (rows - 1) * gap;
+            layout.height = area + top + bottom;
+            layout.margin = Object.assign({}, layout.margin, { t: top, b: bottom });
+
+            const gx = cols > 1 ? 0.07 : 0;
+            const w = (1 - gx * (cols - 1)) / cols;
+            const h = panel / area;
+            const gy = gap / area;
+            const labels = layout.annotations
+                .filter((a) => a.yref === 'paper' && a.yanchor === 'bottom')
+                .sort((a, b) => a.x - b.x);
+            const yTitle = layout.yaxis && layout.yaxis.title;
+
+            xs.forEach((xKey, i) => {
+                const yKey = ys[i];
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                const x0 = col * (w + gx);
+                const y1 = 1 - row * (h + gy);
+                layout[xKey].domain = [x0, x0 + w];
+                layout[yKey].domain = [Math.max(0, y1 - h), y1];
+                if (cols > 1 && row < rows - 1) layout[xKey].title = { text: '' };
+                layout[yKey].showticklabels = col === 0;
+                layout[yKey].title = col === 0 && yTitle ? yTitle : { text: '' };
+                if (labels[i]) Object.assign(labels[i], { x: x0 + w / 2, y: y1, xanchor: 'center', yanchor: 'bottom' });
+            });
+        }
+
+        function buildLayout(chart, size) {
+            const original = chart.fig.layout;
+            const layout = JSON.parse(JSON.stringify(original));
+            const small = size === 's';
+
+            delete layout.width;
+            layout.autosize = true;
+            layout.title = { text: '' };
+            layout.font = Object.assign({}, layout.font, { family: FONT });
+            layout.hoverlabel = Object.assign({}, layout.hoverlabel, { font: { family: FONT } });
+            layout.paper_bgcolor = '#ffffff';
+            layout.annotations = (layout.annotations || [])
+                .filter((a) => !isSideNote(a))
+                .map((a) => Object.assign({}, a, {
+                    text: shortFacetLabel(a.text),
+                    font: Object.assign({ size: small ? 11 : 12, color: '#475467' }, a.font)
+                }));
+            layout.margin = { l: 8, r: 8, t: layout.annotations.length ? 36 : 12, b: 8, pad: 4 };
+
+            ['x', 'y'].forEach((letter) => axisKeys(layout, letter).forEach((key) => {
+                layout[key] = Object.assign({}, layout[key], { automargin: true });
+                if (isTouch) layout[key].fixedrange = true;
+            }));
+            if (isTouch) {
+                // No celular, arrastar o dedo sobre o gráfico rola a página (em vez de dar zoom).
+                layout.dragmode = false;
+                // Um toque mostra uma única caixa com todos os valores, em vez de várias etiquetas soltas.
+                const data = chart.fig.data;
+                if (data.some((t) => t.type === 'box' || t.type === 'violin' || t.type === 'bar')) {
+                    layout.hovermode = data.some((t) => t.orientation === 'h') ? 'y unified' : 'x unified';
+                    layout.hoverlabel = Object.assign({}, layout.hoverlabel, { namelength: -1 });
+                }
+            }
+
+            if (small) {
+                ['x', 'y'].forEach((letter) => {
+                    const axis = layout[letter + 'axis'];
+                    if (!axis) return;
+                    // Nomes de categoria em linhas curtas em vez de inclinados.
+                    const categories = chart.categories[letter];
+                    if (categories.some((c) => c.length > 10)) {
+                        Object.assign(axis, {
+                            tickmode: 'array',
+                            tickvals: categories,
+                            ticktext: categories.map((c) => wrapText(c, 10)),
+                            tickangle: 0,
+                            tickfont: Object.assign({}, axis.tickfont, {
+                                size: Math.min((axis.tickfont && axis.tickfont.size) || 12, 11)
+                            })
+                        });
                     }
                 });
-            });
+                // Títulos de eixo horizontal muito longos em duas linhas.
+                axisKeys(layout, 'x').forEach((key) => {
+                    const title = layout[key].title;
+                    if (title && typeof title.text === 'string' && title.text.length > 44 && !/<br/i.test(title.text)) {
+                        layout[key].title = Object.assign({}, title, { text: wrapText(title.text, 44) });
+                    }
+                });
+            }
 
-            // Botão para recolher/expandir o menu
-            const menuToggleBtn = document.getElementById('menu-toggle');
-            menuToggleBtn.addEventListener('click', () => {
-                document.body.classList.toggle('collapsed');
-            });
+            // Legenda (quando existe) acima do gráfico, na horizontal; no celular, dois itens por linha.
+            if (layout.showlegend !== false) {
+                layout.legend = Object.assign({}, layout.legend, {
+                    orientation: 'h',
+                    x: 0,
+                    xanchor: 'left',
+                    y: 1.02,
+                    yanchor: 'bottom'
+                }, small ? { entrywidth: 0.5, entrywidthmode: 'fraction' } : {});
+            }
 
-            // Garante que o primeiro item ("Início") esteja selecionado ao carregar
-            toggleDimension('inicio');
+            if (axisKeys(layout, 'x').length > 1) {
+                layoutFacets(layout, size, original);
+            } else {
+                const height = original.height || 500;
+                layout.height = size === 'l' ? height : Math.min(height, size === 'm' ? 460 : 420);
+            }
+            return layout;
+        }
+
+        /* ---------------- Desenho dos gráficos ---------------- */
+
+        const charts = [];
+
+        function configFor(chart) {
+            const Plotly = window.Plotly;
+            return {
+                responsive: true,
+                displaylogo: false,
+                displayModeBar: isTouch ? false : 'hover',
+                scrollZoom: false,
+                modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d', 'autoScale2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+                modeBarButtonsToAdd: [{
+                    // Baixa a imagem no formato original (com título e texto explicativo).
+                    name: 'Baixar imagem (PNG)',
+                    icon: Plotly.Icons.camera,
+                    click: () => Plotly.downloadImage(
+                        { data: chart.fig.data, layout: chart.fig.layout },
+                        { format: 'png', filename: chart.name, width: chart.fig.layout.width, height: chart.fig.layout.height, scale: 2 }
+                    )
+                }]
+            };
+        }
+
+        function draw(chart) {
+            chart.size = sizeOf(chart.plot.clientWidth);
+            return window.Plotly.react(chart.plot, chart.fig.data, buildLayout(chart, chart.size), chart.config);
+        }
+
+        function refreshCharts() {
+            charts.forEach((chart) => {
+                if (!chart.el.offsetParent) return; // seção escondida
+                if (sizeOf(chart.plot.clientWidth) !== chart.size) {
+                    draw(chart);
+                } else {
+                    Promise.resolve(window.Plotly.Plots.resize(chart.plot)).catch(() => {});
+                }
+            });
+        }
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(refreshCharts, 150);
         });
+
+        function showLoading(el) {
+            el.textContent = '';
+            const loading = document.createElement('div');
+            loading.className = 'chart-loading';
+            loading.setAttribute('role', 'status');
+            loading.textContent = 'Carregando gráfico…';
+            el.appendChild(loading);
+        }
+
+        function showError(el, name) {
+            el.textContent = '';
+            const box = document.createElement('div');
+            box.className = 'chart-error';
+            box.setAttribute('role', 'alert');
+            const message = document.createElement('p');
+            message.textContent = 'Não foi possível carregar este gráfico.';
+            const buttons = document.createElement('div');
+            const retry = document.createElement('button');
+            retry.type = 'button';
+            retry.className = 'btn btn-primary';
+            retry.textContent = 'Tentar novamente';
+            retry.addEventListener('click', () => {
+                delete el.dataset.state;
+                renderChart(el);
+            });
+            const original = document.createElement('a');
+            original.className = 'btn';
+            original.href = 'graficos_html/' + name + '.html';
+            original.target = '_blank';
+            original.rel = 'noopener';
+            original.textContent = 'Abrir versão original';
+            buttons.append(retry, original);
+            box.append(message, buttons);
+            el.appendChild(box);
+        }
+
+        async function renderChart(el) {
+            if (el.dataset.state) return;
+            el.dataset.state = 'loading';
+            showLoading(el);
+            const name = el.dataset.fig;
+            try {
+                const [fig] = await Promise.all([
+                    fetch('graficos_json/' + name + '.json').then((response) => {
+                        if (!response.ok) throw new Error('HTTP ' + response.status);
+                        return response.json();
+                    }),
+                    loadPlotly()
+                ]);
+                const chart = {
+                    el,
+                    name,
+                    fig,
+                    categories: { x: categoriesOf(fig.data, 'x'), y: categoriesOf(fig.data, 'y') }
+                };
+                el.textContent = '';
+                el.appendChild(buildCard(fig.layout));
+                chart.plot = el.querySelector('.chart-plot');
+                chart.config = configFor(chart);
+                await draw(chart);
+                charts.push(chart);
+                el.dataset.state = 'ready';
+            } catch (error) {
+                console.error('Erro ao carregar o gráfico ' + name, error);
+                el.dataset.state = 'error';
+                showError(el, name);
+            }
+        }
+
+        // Cada gráfico só é baixado quando a pessoa chega perto dele na página.
+        const chartElements = document.querySelectorAll('.chart[data-fig]');
+        chartElements.forEach(showLoading);
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        observer.unobserve(entry.target);
+                        renderChart(entry.target);
+                    }
+                });
+            }, { rootMargin: '800px 0px' });
+            chartElements.forEach((el) => observer.observe(el));
+        }
+
+        route(true);
+    })();
     </script>
-</head>
-<body>
-    <button id="menu-toggle" title="Recolher/Expandir Menu">&#9776;</button>
-    
-    <!-- Menu Lateral -->
-    <div id="menu">
-        <h3 onclick="toggleDimension('inicio')">Início</h3>
-        <h3 onclick="toggleDimension('fontes')">Fontes de Dados</h3>
-        <h3 onclick="toggleDimension('esclarecimentos')">Esclarecimentos</h3>
-        <h3 onclick="toggleDimension('resumo')">Resumo dos Regimes e Composição Política</h3>
-        <h3 onclick="toggleDimension('economicos')">Indicadores Econômicos</h3>
-        <h3 onclick="toggleDimension('humanos')">Indicadores de Desenvolvimento Humano</h3>
-        <h3 onclick="toggleDimension('sociais')">Indicadores Sociais</h3>
-        <h3 onclick="toggleDimension('ambientais')">Indicadores Ambientais e de Sustentabilidade</h3>
-        <h3 onclick="toggleDimension('institucionais')">Indicadores Institucionais e de Governança</h3>
-        <h3 onclick="toggleDimension('demograficos')">Indicadores Demográficos</h3>
-        <h3 onclick="toggleDimension('culturais')">Indicadores Culturais</h3>
-    </div>
-
-    <!-- Conteúdo das dimensões -->
-
-    <!-- Seção: Início -->
-    <div id="inicio" class="dimension-content active">
-        <div class="text-content">
-            <h2>Sobre esta análise</h2>
-            
-            <p>Sou cientista de dados e, ao longo deste projeto, decidi avaliar por conta própria o que diversos indicadores socioeconômicos e culturais revelam sobre <strong>orientações políticas (direita/esquerda)</strong> e <strong>tipos de regime</strong>. Meu objetivo foi conduzir uma análise transparente e imparcial – uma “análise de peito aberto” – que se baseia unicamente em cruzamentos de diferentes fontes de <strong>dados oficiais e reconhecidos</strong>, sem recorrer a pressupostos ideológicos ou interpretações prévias.</p>
-            
-            <h4>Surpresas e Aprendizados</h4>
-            <p>Fiquei surpreso com algumas das informações que os dados revelaram – e, inclusive, algumas chegaram a contrariar minhas ideias iniciais – porém, como cientista de dados, pude <strong>refinar meu entendimento e ajustar minhas hipóteses</strong> com base nas evidências analisadas.</p>
-            
-            <p>Esta é uma investigação inicial, focada em identificar <strong>tendências gerais e relações</strong> entre variáveis como:</p>
-            <ul>
-                <li>PIB</li>
-                <li>IDH</li>
-                <li>Desigualdade</li>
-                <li>Meio ambiente</li>
-                <li>Democracia</li>
-            </ul>
-            
-            <p>Não me aprofundei ainda em análises estatísticas avançadas ou em modelos complexos: aqui, você encontrará um panorama direto dos <strong>dados brutos</strong>, organizado por <strong>regime político</strong> e pelo índice <strong>Left-Right (PSLRI)</strong>.</p>
-            
-            <p>Nas visualizações (boxplots), cada caixa sintetiza a distribuição histórica de um indicador – considerando praticamente todos os países ao longo dos anos – para cada regime ou orientação política, funcionando como um “retrato” das conjunturas ao longo do tempo e destacando as tendências gerais e as relações entre as variáveis.</p>
-            
-            <hr>
-            
-            <p><strong>Não aceite passivamente nenhuma conclusão</strong> – nem as minhas, nem as de terceiros. Convido você a <strong>explorar os conjuntos de dados originais</strong>, verificar cada fonte e reproduzir os cálculos.<br>
-            Só assim podemos <strong>formar nossas próprias opiniões</strong> de forma consciente e responsável.</p>
-        </div>
-    </div>
-
-    <!-- Seção: Fontes de Dados -->
-    <div id="fontes" class="dimension-content">
-        <div class="text-content">
-            <h1 id="fontes-de-dados-utilizadas">Fontes de dados utilizadas</h1>
-            <p>Nesta página você encontra todas as fontes de dados utilizadas neste projeto.<br />
-            Os links para cada fonte estão detalhados em seguida.</p>
-            <p>Fontes:<br>
-            - <strong>Our World in Data</strong><br />
-            - <strong>Varieties of Democracy (V-Dem)</strong><br />
-            - <strong>Banco Mundial (World Bank)</strong><br />
-            - <strong>Global Footprint Network</strong><br />
-            - <strong>Fraser Institute</strong>  </p>
-            <p>Para mais detalhes sobre as metodologias empregadas, o escopo dos indicadores e os processos de coleta de dados de cada instituição, consulte diretamente os sites oficiais de cada fonte.  </p>
-            <hr />
-            <h2 id="resumo-dos-regimes-e-composicao-politica">Resumo dos Regimes e Composição Política</h2>
-            <ul>
-            <li>
-            <p><strong>Regime Político</strong><br />
-              Fonte: <em>Our World in Data</em>, Political Regime dataset<br />
-            <a href="https://ourworldindata.org/grapher/political-regime" target="_blank">https://ourworldindata.org/grapher/political-regime</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Party-System Left-Right Index (PSLRI)</strong><br />
-              Fonte: <em>Varieties of Democracy (V-Dem)</em>, Country–Year Full + Others v14<br />
-            <a href="https://www.v-dem.net/data/the-v-dem-dataset/country-year-v-dem-fullothers-v14/" target="_blank">https://www.v-dem.net/data/the-v-dem-dataset/country-year-v-dem-fullothers-v14/</a><br />
-              <br></p>
-            </li>
-            </ul>
-            <hr />
-            <h2 id="indicadores-economicos">Indicadores Econômicos</h2>
-            <ul>
-            <li>
-            <p><strong>PIB per capita (PPC)</strong><br />
-              Fonte: World Bank<br />
-            <a href="https://prosperitydata360.worldbank.org/en/indicator/WB+WDI+NY+GDP+PCAP+PP+KD" target="_blank">https://prosperitydata360.worldbank.org/en/indicator/WB+WDI+NY+GDP+PCAP+PP+KD</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Crescimento do PIB (anual %)</strong><br />
-              Fonte: World Bank<br />
-            <a href="https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG" target="_blank">https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Índice de Gini (Desigualdade)</strong><br />
-              Fonte: World Bank<br />
-            <a href="https://data.worldbank.org/indicator/SI.POV.GINI" target="_blank">https://data.worldbank.org/indicator/SI.POV.GINI</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Balança Comercial (% do PIB)</strong><br />
-              Fonte: World Bank<br />
-            <a href="https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS" target="_blank">https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS</a><br />
-              <br></p>
-            </li>
-            </ul>
-            <hr />
-            <h2 id="indicadores-de-desenvolvimento-humano">Indicadores de Desenvolvimento Humano</h2>
-            <ul>
-            <li>
-            <p><strong>Índice de Desenvolvimento Humano (IDH)</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/human-development-index" target="_blank">https://ourworldindata.org/grapher/human-development-index</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Expectativa de Vida ao Nascer</strong><br />
-              Fonte: World Bank<br />
-            <a href="https://data.worldbank.org/indicator/SP.DYN.LE00.IN" target="_blank">https://data.worldbank.org/indicator/SP.DYN.LE00.IN</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Taxa de Alfabetização de Adultos (%)</strong><br />
-              Fonte: World Bank<br />
-            <a href="https://data.worldbank.org/indicator/SE.ADT.LITR.ZS" target="_blank">https://data.worldbank.org/indicator/SE.ADT.LITR.ZS</a><br />
-              <br></p>
-            </li>
-            </ul>
-            <hr />
-            <h2 id="indicadores-sociais">Indicadores Sociais</h2>
-            <ul>
-            <li>
-            <p><strong>Taxa de Pobreza (extrema)</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://nyc3.digitaloceanspaces.com/owid-public/data/poverty/pip_dataset.csv" target="_blank">https://nyc3.digitaloceanspaces.com/owid-public/data/poverty/pip_dataset.csv</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Taxa de Desemprego (% da força de trabalho)</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/unemployment-rate" target="_blank">https://ourworldindata.org/grapher/unemployment-rate</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Índice de Desigualdade de Gênero (GII)</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/gender-inequality-index-from-the-human-development-report" target="_blank">https://ourworldindata.org/grapher/gender-inequality-index-from-the-human-development-report</a><br />
-              <br></p>
-            </li>
-            </ul>
-            <hr />
-            <h2 id="indicadores-ambientais-e-de-sustentabilidade">Indicadores Ambientais e de Sustentabilidade</h2>
-            <ul>
-            <li>
-            <p><strong>Pegada Ecológica (gha per capita)</strong><br />
-              Fonte: Global Footprint Network<br />
-            <a href="https://data.footprintnetwork.org/" target="_blank">https://data.footprintnetwork.org/</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Emissões de CO₂ per capita (toneladas)</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/co2-emissions-per-capita" target="_blank">https://ourworldindata.org/grapher/co2-emissions-per-capita</a><br />
-              <br></p>
-            </li>
-            </ul>
-            <hr />
-            <h2 id="indicadores-institucionais-e-de-governanca">Indicadores Institucionais e de Governança</h2>
-            <ul>
-            <li>
-            <p><strong>Índice de Corrupção Política</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/political-corruption-index" target="_blank">https://ourworldindata.org/grapher/political-corruption-index</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Índice de Liberdade Econômica</strong><br />
-              Fonte: Fraser Institute<br />
-            <a href="https://www.fraserinstitute.org/economic-freedom/dataset" target="_blank">https://www.fraserinstitute.org/economic-freedom/dataset</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Índice de Democracia Liberal</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/liberal-democracy-index" target="_blank">https://ourworldindata.org/grapher/liberal-democracy-index</a><br />
-              <br></p>
-            </li>
-            </ul>
-            <hr />
-            <h2 id="indicadores-demograficos">Indicadores Demográficos</h2>
-            <ul>
-            <li>
-            <p><strong>Taxa de Crescimento Populacional (anual %)</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/population-growth-rates" target="_blank">https://ourworldindata.org/grapher/population-growth-rates</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>População Urbana (% do total)</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/share-of-population-urban" target="_blank">https://ourworldindata.org/grapher/share-of-population-urban</a><br />
-              <br></p>
-            </li>
-            </ul>
-            <hr />
-            <h2 id="indicadores-culturais">Indicadores Culturais</h2>
-            <ul>
-            <li>
-            <p><strong>Despesas com Patrimônio Cultural e Natural per capita (USD)</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/expenditure-on-cultural-and-natural-heritage-per-capita" target="_blank">https://ourworldindata.org/grapher/expenditure-on-cultural-and-natural-heritage-per-capita</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Satisfação com a Vida (Cantril Ladder Score)</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/happiness-cantril-ladder" target="_blank">https://ourworldindata.org/grapher/happiness-cantril-ladder</a><br />
-              <br></p>
-            </li>
-            <li>
-            <p><strong>Índice de Cultura Democrática</strong><br />
-              Fonte: Our World in Data<br />
-            <a href="https://ourworldindata.org/grapher/democracy-index-eiu" target="_blank">https://ourworldindata.org/grapher/democracy-index-eiu</a><br />
-              <br></p>
-            </li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Nova Seção: Esclarecimentos -->
-    <div id="esclarecimentos" class="dimension-content">
-        <div class="text-content">
-            <h1 id="esclarecimentos">Esclarecimentos</h1>
-            <h2 id="party-system-left-right-index-pslri">Party-System Left-Right Index (PSLRI)</h2>
-            <p>O <strong>Party-System Left-Right Index (PSLRI)</strong> é um índice que traduz, de forma simples, a orientação econômica de um sistema de partidos políticos em um valor único que varia de 0 (mais à esquerda) a 1 (mais à direita). </p>
-            <ul>
-            <li>Na prática, o PSLRI quantifica a posição econômica de um sistema de partidos:<ol>
-            <li>Cada partido recebe uma nota de 0 (mais à esquerda) a 1 (mais à direita), definida por especialistas.</li>
-            <li>Multiplica-se essa nota pela participação de cada partido no parlamento (proporção de cadeiras).</li>
-            <li>A soma de todas as notas ponderadas gera um único valor entre 0 e 1, refletindo a orientação econômica geral.</li>
-            </ol>
-            </li>
-            </ul>
-            <p>Dessa forma, o PSLRI apresenta um “retrato” da configuração econômica de todo o espectro partidário de um país em um determinado momento, facilitando comparações ao longo do tempo ou entre diferentes regimes.</p>
-            <p>Para conhecer em detalhes como o PSLRI é definido e calculado — incluindo fórmulas e procedimentos estatísticos — consulte o documento abaixo.</p>
-            <hr />
-            <p><strong>Referência</strong><br />
-            ANGIOLLO, F.; WIEBRECHT, F. From Individual Parties to Party Systems: A New Approach to Calculate Party Systems’ Variables. <em>V-Dem Working Paper</em>, n. 146, 2023. Disponível em: <a href="https://www.v-dem.net/media/publications/wp146.pdf" target="_blank">https://www.v-dem.net/media/publications/wp146.pdf</a>. Acesso em: 17 maio 2025. </p>
-            <p><br><br></p>
-            <h2 id="categorias-de-pslri-para-visualizacao">Categorias de PSLRI para Visualização</h2>
-            <p>Para facilitar a interpretação nos gráficos, dividi os valores do PSLRI em quatro faixas, definidas a partir da distribuição dos dados brutos:</p>
-            <p><strong>0,26–0,54 (Baixa Esquerda)</strong><br />
-            <strong>0,54–0,63 (Centro-Esquerda)</strong><br />
-            <strong>0,63–0,71 (Centro-Direita)</strong><br />
-            <strong>0,71–1,00 (Alta Direita)</strong> </p>
-            <p>⚠️ <strong>Importante:</strong> essas faixas foram criadas <strong>arbitrariamente</strong> para efeito de <strong>processamento e visualização</strong>. Elas não refletem definições oficiais de espectro político, mas sim subdivisões práticas para ajudar na análise.</p>
-            <p><br><br></p>
-            <h2 id="definicoes-de-regimes-politicos">Definições de Regimes Políticos</h2>
-            <p>O sistema de classificação utilizado divide os países em quatro categorias principais, considerando a existência e a qualidade das eleições e o respeito às liberdades civis:</p>
-            <ol>
-            <li>
-            <p><strong>Autocracia Fechada</strong><br />
-             Não há eleições multipartidárias livres; o poder permanece concentrado sem competição formal.</p>
-            </li>
-            <li>
-            <p><strong>Autocracia Eleitoral</strong><br />
-             Existem eleições com múltiplos partidos, mas o processo não é livre e justo: ocorrem restrições e irregularidades que garantem a manutenção dos governantes.</p>
-            </li>
-            <li>
-            <p><strong>Democracia Eleitoral</strong><br />
-             Realizam-se eleições livres e justas, com competição real entre partidos, embora outras liberdades (imprensa, associação) possam ser limitadas.</p>
-            </li>
-            <li>
-            <p><strong>Democracia Liberal</strong><br />
-             Além de eleições livres e justas, há plena garantia de direitos e liberdades individuais (liberdade de expressão, imprensa, associação), cumprindo um padrão mais elevado de governança democrática.</p>
-            </li>
-            </ol>
-            <p>Para chegar a essa tipologia, os autores combinam diversos indicadores do V-Dem, tais como: <br />
-            - Existência de eleições multipartidárias<br />
-            - Qualidade e integridade do processo eleitoral<br />
-            - Nível de direitos civis e participação política </p>
-            <hr />
-            <p><strong>Referência</strong><br />
-            LÜHRMANN, Anna; TANNENBERG, Marcus; LINDBERG, Staffan I. Regimes of the World (RoW): Opening New Avenues for the Comparative Study of Political Regimes. <em>Politics &amp; Governance</em>, v. 6, n. 1, p. 60–77, 2018. Disponível em: <a href="https://www.cogitatiopress.com/politicsandgovernance/article/view/1214" target="_blank">https://www.cogitatiopress.com/politicsandgovernance/article/view/1214</a>. Acesso em: 17 maio 2025.</p>
-        </div>
-    </div>
-
-
-    <!-- Seção Resumo (agora é a quarta) -->
-    <div id="resumo" class="dimension-content">
-        <div class="indicator-title">Distribuição PSLRI e Regime</div>
-        <object data="graficos_html/fig_pslri_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_pslri_distribuicao.html" type="text/html"></object>
-    </div>
-
-    <div id="economicos" class="dimension-content">
-        <div class="indicator-title"><span style='color:#000000;'>PIB e Qualidade de Vida</span></div>
-        <object data="graficos_html/fig_pib_vida.html" type="text/html"></object>
-
-        <div class="indicator-title">PIB por Regime e PSLRI</div>
-        <object data="graficos_html/fig_pib_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_pib_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Crescimento do PIB</div>
-        <object data="graficos_html/fig_crescimento_pib.html" type="text/html"></object>
-        <object data="graficos_html/fig_crescimento_pib_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Índice de Gini</div>
-        <object data="graficos_html/fig_gini_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_gini_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Balança Comercial</div>
-        <object data="graficos_html/fig_balanca_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_balanca_pslri.html" type="text/html"></object>
-    </div>
-
-    <div id="humanos" class="dimension-content">
-        <div class="indicator-title">IDH por Regime e PSLRI</div>
-        <object data="graficos_html/fig_idh_regime_politico.html" type="text/html"></object>
-        <object data="graficos_html/fig_idh_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Expectativa de Vida</div>
-        <object data="graficos_html/fig_expectativa_vida.html" type="text/html"></object>
-        <object data="graficos_html/fig_expectativa_vida_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Alfabetização</div>
-        <object data="graficos_html/fig_alfabetizacao_politico.html" type="text/html"></object>
-        <object data="graficos_html/fig_alfabetizacao_pslri.html" type="text/html"></object>
-    </div>
-
-    <div id="sociais" class="dimension-content">
-        <div class="indicator-title">Taxa de Pobreza</div>
-        <object data="graficos_html/fig_taxa_pobreza_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_taxa_pobreza_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Desigualdade de Gênero</div>
-        <object data="graficos_html/fig_desigualdade_genero_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_desigualdade_genero_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Taxa de Desemprego</div>
-        <object data="graficos_html/fig_taxa_desemprego_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_taxa_desemprego_pslri.html" type="text/html"></object>
-    </div>
-
-    <div id="ambientais" class="dimension-content">
-        <div class="indicator-title">Pegada Ecológica</div>
-        <object data="graficos_html/fig_pegada_ecologica_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_pegada_ecologica_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Emissões de CO₂</div>
-        <object data="graficos_html/fig_emissoes_co2_politico.html" type="text/html"></object>
-        <object data="graficos_html/fig_emissoes_co2_pslri.html" type="text/html"></object>
-    </div>
-
-    <div id="institucionais" class="dimension-content">
-        <div class="indicator-title">Corrupção Política</div>
-        <object data="graficos_html/fig_corrupcao_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_corrupcao_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Liberdade Econômica</div>
-        <object data="graficos_html/fig_liberdade_economica.html" type="text/html"></object>
-        <object data="graficos_html/fig_liberdade_economica_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Democracia Liberal</div>
-        <object data="graficos_html/fig_democracia_liberal.html" type="text/html"></object>
-        <object data-"graficos_html/fig_democracia_liberal_pslri.html" type="text/html"></object>
-    </div>
-
-    <div id="demograficos" class="dimension-content">
-        <div class="indicator-title">Crescimento Populacional</div>
-        <object data="graficos_html/fig_crescimento_populacional_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_crescimento_populacional_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">População Urbana</div>
-        <object data="graficos_html/fig_populacao_urbana_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_populacao_urbana_pslri.html" type="text/html"></object>
-    </div>
-
-    <div id="culturais" class="dimension-content">
-        <div class="indicator-title">Despesas Culturais</div>
-        <object data="graficos_html/fig_despesas_culturais_politico.html" type="text/html"></object>
-        <object data="graficos_html/fig_despesas_culturais_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Satisfação com a Vida</div>
-        <object data="graficos_html/fig_satisfacao_vida_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_satisfacao_vida_pslri.html" type="text/html"></object>
-
-        <div class="indicator-title">Cultura Democrática</div>
-        <object data="graficos_html/fig_cultura_democratica_regime.html" type="text/html"></object>
-        <object data="graficos_html/fig_cultura_democratica_pslri.html" type="text/html"></object>
-    </div>
 </body>
 </html>
-
